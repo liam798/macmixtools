@@ -1,0 +1,92 @@
+[0/1] Planning build
+Building for debugging...
+[1/6] Compiling SSHTools Constants.swift
+[2/9] Compiling SSHTools SwiftTermWrapper.swift
+error: emit-module command failed with exit code 1 (use -v to see invocation)
+[3/9] Compiling SSHTools SettingsManager.swift
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/SettingsManager.swift:50:15: warning: 'allowedFileTypes' was deprecated in macOS 12.0: Use -allowedContentTypes instead
+        panel.allowedFileTypes = ["png", "jpg", "jpeg", "webp"]
+              ^
+[4/9] Emitting module SSHTools
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:5:5: error: expected declaration
+    @StateObject private var todoManager = TodoManager()
+    ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:4:8: note: in declaration of 'HomeView'
+struct HomeView: View {
+       ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:5:5: error: expected '}' in struct
+    @StateObject private var todoManager = TodoManager()
+    ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:4:23: note: to match this opening '{'
+struct HomeView: View {
+                      ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:4:8: error: type 'HomeView' does not conform to protocol 'View'
+struct HomeView: View {
+       ^
+SwiftUI.View:7:20: note: protocol requires nested type 'Body'; do you want to add it?
+    associatedtype Body : View
+                   ^
+[5/9] Compiling SSHTools HomeView.swift
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:199:5: error: attribute 'private' can only be used in a non-local scope
+    private func addTodo() {
+    ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:363:1: error: declaration is only valid at file scope
+extension View {
+^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:415:1: error: declaration is only valid at file scope
+extension NSBezierPath {
+^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:488:2: error: expected '}' in struct
+}
+ ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:4:23: note: to match this opening '{'
+struct HomeView: View {
+                      ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:364:51: error: cannot find type 'RectCorner' in scope
+    func cornerRadius(_ radius: CGFloat, corners: RectCorner) -> some View {
+                                                  ^~~~~~~~~~
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:94:56: error: extra argument 'corners' in call
+                            .cornerRadius(12, corners: [.topLeft, .topRight])
+                                         ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:94:58: error: reference to member 'topLeft' cannot be resolved without a contextual type
+                            .cornerRadius(12, corners: [.topLeft, .topRight])
+                                                         ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:94:68: error: reference to member 'topRight' cannot be resolved without a contextual type
+                            .cornerRadius(12, corners: [.topLeft, .topRight])
+                                                                   ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:365:19: error: cannot find 'RoundedCorner' in scope
+        clipShape(RoundedCorner(radius: radius, corners: corners))
+                  ^~~~~~~~~~~~~
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:411:26: error: 'cgPath' is only available in macOS 14.0 or newer
+        return Path(path.cgPath)
+                         ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:411:26: note: add 'if #available' version check
+        return Path(path.cgPath)
+                         ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:373:10: note: add @available attribute to enclosing instance method
+    func path(in rect: CGRect) -> Path {
+         ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:369:8: note: add @available attribute to enclosing struct
+struct RoundedCorner: Shape {
+       ^
+[6/14] Compiling SSHTools ContentView.swift
+[7/14] Compiling SSHTools SidebarView.swift
+[8/14] Compiling SSHTools ConnectionsStore.swift
+[9/14] Compiling SSHTools TabsView.swift
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:5:5: error: expected declaration
+    @StateObject private var todoManager = TodoManager()
+    ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:4:8: note: in declaration of 'HomeView'
+struct HomeView: View {
+       ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:5:5: error: expected '}' in struct
+    @StateObject private var todoManager = TodoManager()
+    ^
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/HomeView.swift:4:23: note: to match this opening '{'
+struct HomeView: View {
+                      ^
+[10/14] Compiling SSHTools SFTPViewModel.swift
+[11/14] Compiling SSHTools SyncedSFTPViewModel.swift
+[12/14] Compiling SSHTools TerminalView.swift
+[13/14] Compiling SSHTools GeminiService.swift
+error: fatalError
