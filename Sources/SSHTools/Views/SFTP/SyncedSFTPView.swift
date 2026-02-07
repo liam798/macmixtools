@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SyncedSFTPView: View {
     let runner: SSHRunner
+    let connectionID: UUID
     @Binding var path: String
     @Binding var isExpanded: Bool // New binding for expansion state
     let onNavigate: (String) -> Void
@@ -9,15 +10,30 @@ struct SyncedSFTPView: View {
     @StateObject private var viewModel: SyncedSFTPViewModel
     @State private var editedPath: String = ""
     @State private var isShowingTasks = false // Use local state for popover
+    @State private var isShowingSavedTasks = false
     @ObservedObject private var transferManager = TransferManager.shared
     
-    init(runner: SSHRunner, path: Binding<String>, isExpanded: Binding<Bool>, onNavigate: @escaping (String) -> Void) {
+    init(runner: SSHRunner, connectionID: UUID, path: Binding<String>, isExpanded: Binding<Bool>, onNavigate: @escaping (String) -> Void) {
         self.runner = runner
+        self.connectionID = connectionID
         self._path = path
         self._isExpanded = isExpanded
         self.onNavigate = onNavigate
-        let initialPath = path.wrappedValue.isEmpty ? "/" : path.wrappedValue
-        _viewModel = StateObject(wrappedValue: SyncedSFTPViewModel(runner: runner, path: initialPath, onNavigate: onNavigate))
+        let initialPath = {
+            let val = path.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !val.isEmpty { return val }
+            let key = "sshtools.sftp.lastPath.\(connectionID.uuidString)"
+            if let stored = UserDefaults.standard.string(forKey: key),
+               !stored.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return stored.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+            return "/"
+        }()
+        _viewModel = StateObject(wrappedValue: SyncedSFTPViewModelStore.shared.viewModel(
+            runner: runner,
+            initialPath: initialPath,
+            onNavigate: onNavigate
+        ))
         _editedPath = State(initialValue: initialPath)
     }
     
@@ -26,41 +42,38 @@ struct SyncedSFTPView: View {
             // Path and Control Bar
             HStack(spacing: 8) {
                 TextField("Path".localized, text: $editedPath, onCommit: {
-                    if viewModel.path != editedPath {
-                        viewModel.path = editedPath
-                        viewModel.refresh()
-                    }
+                    viewModel.navigate(to: editedPath)
                 })
                 .textFieldStyle(.plain)
                 .font(DesignSystem.Typography.monospace)
                 .foregroundColor(DesignSystem.Colors.text)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 4)
-                .background(DesignSystem.Colors.background.opacity(0.5))
-                .cornerRadius(4)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(DesignSystem.Colors.surfaceSecondary)
+                .cornerRadius(6)
                 .frame(maxWidth: .infinity)
                 
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     // Search/Filter
                     HStack(spacing: 4) {
                         Image(systemName: "magnifyingglass")
-                            .font(.system(size: 10))
+                            .font(.system(size: 11))
                             .foregroundColor(.secondary)
                         TextField("Filter".localized, text: $viewModel.searchText)
                             .textFieldStyle(.plain)
                             .font(.system(size: 11))
                             .frame(width: 80)
                     }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.primary.opacity(0.05))
-                    .cornerRadius(4)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(DesignSystem.Colors.surfaceSecondary)
+                    .cornerRadius(6)
                     
                     // Transfer Tasks Button
                     Button(action: { isShowingTasks.toggle() }) {
                         ZStack(alignment: .topTrailing) {
                             Image(systemName: "arrow.up.arrow.down.circle")
-                                .font(.system(size: 14))
+                                .font(.system(size: 13))
                                 .foregroundColor(transferManager.tasks.isEmpty ? .secondary : .blue)
                             
                             if !transferManager.tasks.isEmpty {
@@ -76,6 +89,17 @@ struct SyncedSFTPView: View {
                         TransferListView()
                     }
                     .help("Transfer Tasks".localized)
+
+                    Button(action: { isShowingSavedTasks.toggle() }) {
+                        Image(systemName: "pin.circle")
+                            .font(.system(size: 13))
+                            .foregroundColor(transferManager.savedTasks(for: connectionID).isEmpty ? .secondary : .blue)
+                    }
+                    .buttonStyle(.borderless)
+                    .popover(isPresented: $isShowingSavedTasks) {
+                        SavedUploadTasksView(connectionID: connectionID, runner: runner)
+                    }
+                    .help("Saved Uploads".localized)
                     
                     // Show Hidden Toggle
                     Button(action: { viewModel.showHiddenFiles.toggle() }) {
@@ -105,11 +129,11 @@ struct SyncedSFTPView: View {
                     .buttonStyle(.borderless)
                     .help(isExpanded ? "Collapse".localized : "Expand".localized)
                 }
-                .frame(height: 24)
+                .frame(height: 26)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
-            .frame(height: 36)
+            .frame(height: 40)
             .background(DesignSystem.Colors.surface)
             
             if let error = viewModel.errorMessage {
@@ -190,6 +214,7 @@ struct StandaloneSFTPView: View {
     var body: some View {
         SyncedSFTPView(
             runner: runner,
+            connectionID: connection.id,
             path: $path,
             isExpanded: $isExpanded,
             onNavigate: { newPath in
@@ -256,8 +281,15 @@ struct FileRowView: View {
                     }
                 case .queuing:
                     ProgressView().scaleEffect(0.4).frame(width: 12, height: 12)
+                case .paused:
+                    Image(systemName: "pause.circle.fill").foregroundColor(.orange)
+                case .cancelled:
+                    Image(systemName: "xmark.circle.fill").foregroundColor(.gray)
                 case .failed(let msg):
-                    Text("Error").foregroundColor(.red).font(.caption).help(msg)
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .help(msg)
                 case .completed:
                     Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
                 case .none:

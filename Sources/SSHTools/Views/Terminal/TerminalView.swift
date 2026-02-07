@@ -1,17 +1,20 @@
 import SwiftUI
 
 struct TerminalView: View {
-    @StateObject private var viewModel: TerminalViewModel
+    @ObservedObject private var viewModel: TerminalViewModel
     @Namespace private var bottomID
     
-    init(connection: SSHConnection) {
-        _viewModel = StateObject(wrappedValue: TerminalViewModel(connection: connection))
+    private let tabID: UUID
+
+    init(connection: SSHConnection, tabID: UUID) {
+        _viewModel = ObservedObject(wrappedValue: TerminalViewModelStore.shared.viewModel(for: connection))
+        self.tabID = tabID
     }
     
     var body: some View {
         GeometryReader { geo in
             let totalHeight = geo.size.height
-            let splitterHeight: CGFloat = 8
+            let splitterHeight: CGFloat = DesignSystem.Layout.terminalSplitterHeight
             
             // 计算高度
             let maxSftpHeight = totalHeight - DesignSystem.Layout.terminalMinHeight - splitterHeight
@@ -21,24 +24,77 @@ struct TerminalView: View {
             VStack(spacing: 0) {
                 // Header
                 HStack {
-                    HStack(spacing: 8) {
-                        Image(systemName: "terminal.fill")
-                            .foregroundColor(DesignSystem.Colors.blue)
-                        Text(viewModel.connection.name)
-                            .font(.headline)
-                            .lineLimit(1)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "terminal.fill")
+                                .foregroundColor(DesignSystem.Colors.blue)
+                            Text(viewModel.connection.name)
+                                .font(.headline)
+                                .lineLimit(1)
+                        }
+
+                        HStack(spacing: 6) {
+                            Button(action: {
+                                let pb = NSPasteboard.general
+                                pb.clearContents()
+                                pb.setString("\(viewModel.connection.effectiveUsername)@\(viewModel.connection.host)", forType: .string)
+                            }) {
+                                Text("\(viewModel.connection.effectiveUsername)@\(viewModel.connection.host)")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundColor(DesignSystem.Colors.textSecondary)
+                                    .lineLimit(1)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(DesignSystem.Colors.surfaceSecondary)
+                            .cornerRadius(8)
+
+                            if !viewModel.runner.currentPath.isEmpty {
+                                Button(action: {
+                                    let pb = NSPasteboard.general
+                                    pb.clearContents()
+                                    pb.setString(viewModel.runner.currentPath, forType: .string)
+                                }) {
+                                    Text(viewModel.runner.currentPath)
+                                        .font(.system(size: 10, weight: .medium))
+                                        .foregroundColor(DesignSystem.Colors.textSecondary)
+                                        .lineLimit(1)
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(DesignSystem.Colors.surfaceSecondary)
+                                .cornerRadius(8)
+                            }
+                        }
                     }
                     
                     Spacer()
                     
                     // Connection Status
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(viewModel.runner.isConnected ? DesignSystem.Colors.green : DesignSystem.Colors.pink)
-                            .frame(width: 6, height: 6)
-                        Text(viewModel.runner.isConnected ? "Connected" : "Disconnected")
-                            .font(.system(size: 10))
-                            .foregroundColor(DesignSystem.Colors.textSecondary)
+                    VStack(alignment: .trailing, spacing: 2) {
+                        HStack(spacing: 6) {
+                            statusDot
+                            Text(statusText)
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(DesignSystem.Colors.textSecondary)
+                            if !viewModel.runner.isConnected && !viewModel.runner.isConnecting {
+                                Button("Reconnect") {
+                                    viewModel.connect()
+                                }
+                                .buttonStyle(.plain)
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(DesignSystem.Colors.blue)
+                            }
+                        }
+
+                        if let error = viewModel.runner.error, !error.isEmpty {
+                            Text(error)
+                                .font(.system(size: 9))
+                                .foregroundColor(.red)
+                                .lineLimit(1)
+                        }
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -46,14 +102,14 @@ struct TerminalView: View {
                     .cornerRadius(DesignSystem.Radius.small)
                 }
                 .padding(.horizontal, DesignSystem.Spacing.medium)
-                .frame(height: 44)
+                .frame(height: 48)
                 .background(DesignSystem.Colors.surface)
                 
                 Divider()
 
                 // 1. 终端区域
                 ZStack(alignment: .topTrailing) {
-                    XTermWebView(runner: viewModel.runner)
+                    XTermWebView(runner: viewModel.runner, tabID: tabID)
                         .frame(height: terminalHeight)
                         .background(Color.black)
                         .clipped()
@@ -98,32 +154,61 @@ struct TerminalView: View {
                     .allowsHitTesting(false) // Container doesn't block, only buttons inside do
                     .zIndex(10)
                     
-                    // AI 助手按钮 - 右下角
+                    // Quick Actions - 右下角
                     VStack {
                         Spacer()
                         HStack {
                             Spacer()
-                            Button(action: { 
-                                withAnimation(.spring()) {
-                                    viewModel.showAIHelper.toggle() 
+                            HStack(spacing: 8) {
+                                Button(action: { 
+                                    withAnimation(.spring()) {
+                                        viewModel.showFlowPanel.toggle()
+                                        if viewModel.showFlowPanel {
+                                            viewModel.showAIHelper = false
+                                        }
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: "list.bullet.rectangle")
+                                        Text("Flow")
+                                    }
+                                    .font(.system(size: 11, weight: .bold))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(viewModel.showFlowPanel ? DesignSystem.Colors.blue : DesignSystem.Colors.blue.opacity(0.8))
+                                    .foregroundColor(.white)
+                                    .cornerRadius(16)
+                                    .shadow(radius: 4)
+                                    .contentShape(Rectangle())
                                 }
-                            }) {
-                                HStack {
-                                    Image(systemName: "wand.and.stars")
-                                    Text("AI Assistant".localized)
+                                .buttonStyle(.plain)
+                                .allowsHitTesting(true)
+
+                                Button(action: { 
+                                    withAnimation(.spring()) {
+                                        viewModel.showAIHelper.toggle()
+                                        if viewModel.showAIHelper {
+                                            viewModel.showFlowPanel = false
+                                        }
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: "wand.and.stars")
+                                        Text("AI Assistant".localized)
+                                    }
+                                    .font(.system(size: 11, weight: .bold))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(viewModel.showAIHelper ? Color.purple : Color.purple.opacity(0.8))
+                                    .foregroundColor(.white)
+                                    .cornerRadius(16)
+                                    .shadow(radius: 4)
+                                    .contentShape(Rectangle())
                                 }
-                                .font(.system(size: 11, weight: .bold))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(viewModel.showAIHelper ? Color.purple : Color.purple.opacity(0.8))
-                                .foregroundColor(.white)
-                                .cornerRadius(16)
-                                .shadow(radius: 4)
-                                .contentShape(Rectangle())
+                                .buttonStyle(.plain)
+                                .allowsHitTesting(true)
                             }
-                            .buttonStyle(.plain)
                             .padding(20)
-                            .allowsHitTesting(true)
                         }
                     }
                     .zIndex(5)
@@ -144,6 +229,28 @@ struct TerminalView: View {
                                 )
                                 .padding(.trailing, 20)
                                 .padding(.bottom, 60) // Shift up to be above the button
+                                .allowsHitTesting(true)
+                            }
+                        }
+                        .allowsHitTesting(true)
+                        .zIndex(20)
+                    }
+
+                    if viewModel.showFlowPanel {
+                        VStack {
+                            Spacer()
+                            HStack {
+                                Spacer()
+                                TerminalFlowOverlay(
+                                    isPresented: $viewModel.showFlowPanel,
+                                    groups: $viewModel.flowGroups,
+                                    stopOnError: $viewModel.stopFlowOnError,
+                                    onExecuteStep: viewModel.executeFlowStep,
+                                    onExecuteGroup: viewModel.executeFlowGroup,
+                                    onExecuteAll: viewModel.executeAllFlowGroups
+                                )
+                                .padding(.trailing, 20)
+                                .padding(.bottom, 60)
                                 .allowsHitTesting(true)
                             }
                         }
@@ -182,10 +289,10 @@ struct TerminalView: View {
                     if viewModel.runner.isConnected {
                         SyncedSFTPView(
                             runner: viewModel.runner,
+                            connectionID: viewModel.connection.id,
                             path: $viewModel.runner.currentPath,
                             isExpanded: Binding(get: { viewModel.isSFTPViewExpanded }, set: { viewModel.toggleSFTP(expanded: $0) }),
                             onNavigate: { dir in
-                                viewModel.runner.sendRaw("cd \"\(dir)\"\r")
                                 viewModel.runner.currentPath = dir
                             }
                         )
@@ -223,6 +330,24 @@ struct TerminalView: View {
             Text("Success".localized).font(.caption).foregroundColor(.white)
                 .padding(.horizontal, 12).padding(.vertical, 4)
                 .background(Color.green.opacity(0.8)).cornerRadius(12)
+        }
+    }
+
+    private var statusText: String {
+        if viewModel.runner.isConnecting {
+            return "Connecting"
+        }
+        return viewModel.runner.isConnected ? "Connected" : "Disconnected"
+    }
+
+    @ViewBuilder
+    private var statusDot: some View {
+        if viewModel.runner.isConnecting {
+            ProgressView().scaleEffect(0.5).controlSize(.mini)
+        } else {
+            Circle()
+                .fill(viewModel.runner.isConnected ? DesignSystem.Colors.green : DesignSystem.Colors.pink)
+                .frame(width: 6, height: 6)
         }
     }
 }

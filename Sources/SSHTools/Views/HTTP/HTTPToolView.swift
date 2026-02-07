@@ -17,6 +17,54 @@ struct HTTPRequestHistory: Identifiable, Codable {
     let date: Date
 }
 
+struct HTTPAISpec: Decodable {
+    struct AIHeaderItem: Decodable {
+        let key: String
+        let value: String
+    }
+
+    let method: String?
+    let url: String?
+    let headers: [AIHeaderItem]
+    let body: String?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        method = try container.decodeIfPresent(String.self, forKey: .method)
+        url = try container.decodeIfPresent(String.self, forKey: .url)
+        body = try container.decodeIfPresent(String.self, forKey: .body)
+
+        if let arrayHeaders = try? container.decodeIfPresent([AIHeaderItem].self, forKey: .headers) {
+            headers = arrayHeaders ?? []
+        } else if let dictHeaders = try? container.decodeIfPresent([String: String].self, forKey: .headers) {
+            headers = (dictHeaders ?? [:]).map { AIHeaderItem(key: $0.key, value: $0.value) }
+        } else {
+            headers = []
+        }
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case method
+        case url
+        case headers
+        case body
+    }
+}
+
+enum HTTPAIParseError: LocalizedError {
+    case invalidJSON
+    case missingURL
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidJSON:
+            return "AI response is not valid JSON."
+        case .missingURL:
+            return "AI response did not include a URL."
+        }
+    }
+}
+
 class HTTPToolViewModel: ObservableObject {
     @Published var url: String = "https://httpbin.org/get" { didSet { saveDraft() } }
     @Published var method: String = "GET" { didSet { saveDraft() } }
@@ -210,12 +258,51 @@ class HTTPToolViewModel: ObservableObject {
             headers.remove(at: index)
         }
     }
+
+    func parseAISpec(from text: String) throws -> HTTPAISpec {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { throw HTTPAIParseError.invalidJSON }
+
+        let jsonText: String
+        if let start = trimmed.firstIndex(of: "{"), let end = trimmed.lastIndex(of: "}") {
+            jsonText = String(trimmed[start...end])
+        } else {
+            jsonText = trimmed
+        }
+
+        guard let data = jsonText.data(using: .utf8) else {
+            throw HTTPAIParseError.invalidJSON
+        }
+
+        do {
+            return try JSONDecoder().decode(HTTPAISpec.self, from: data)
+        } catch {
+            throw HTTPAIParseError.invalidJSON
+        }
+    }
+
+    func applyAISpec(_ spec: HTTPAISpec) throws {
+        guard let urlValue = spec.url?.trimmingCharacters(in: .whitespacesAndNewlines), !urlValue.isEmpty else {
+            throw HTTPAIParseError.missingURL
+        }
+
+        let methodValue = (spec.method ?? "GET").trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        let normalizedMethod = methods.contains(methodValue) ? methodValue : "GET"
+
+        self.url = urlValue
+        self.method = normalizedMethod
+        self.headers = spec.headers.map { HeaderItem(key: $0.key, value: $0.value) }
+        self.body = spec.body ?? ""
+    }
 }
 
 struct HTTPToolView: View {
     @StateObject private var viewModel = HTTPToolViewModel()
     @State private var requestTab = 0
     @State private var responseTab = 0
+    @State private var showAIParser = false
+    @State private var aiDocument = ""
+    @State private var isAIParsing = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -273,6 +360,50 @@ struct HTTPToolView: View {
                             .frame(width: 300, height: 400)
                         }
                     }
+                }
+
+                Button(action: { showAIParser.toggle() }) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 14))
+                }
+                .buttonStyle(ModernButtonStyle(variant: .secondary, size: .small))
+                .popover(isPresented: $showAIParser, arrowEdge: .bottom) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("AI Request Parser")
+                            .font(.headline)
+
+                        Text("Paste API docs or instructions, then let AI fill the request.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        TextEditor(text: $aiDocument)
+                            .font(.system(.body, design: .monospaced))
+                            .frame(width: 420, height: 240)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(DesignSystem.borderColor.opacity(0.6), lineWidth: 1)
+                            )
+
+                        HStack {
+                            Button("Cancel") {
+                                showAIParser = false
+                            }
+                            .buttonStyle(.plain)
+
+                            Spacer()
+
+                            Button(action: parseAIDocument) {
+                                if isAIParsing {
+                                    ProgressView().scaleEffect(0.7)
+                                } else {
+                                    Text("Parse")
+                                }
+                            }
+                            .buttonStyle(ModernButtonStyle(variant: .primary, size: .small))
+                            .disabled(aiDocument.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isAIParsing)
+                        }
+                    }
+                    .padding()
                 }
                 
                 Picker("", selection: $viewModel.method) {
@@ -448,5 +579,34 @@ struct HTTPToolView: View {
     
     private var responseDisplay: String {
         responseTab == 0 ? viewModel.responseBodyFormatted : viewModel.responseBody
+    }
+
+    private func parseAIDocument() {
+        let input = aiDocument.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !input.isEmpty else { return }
+        isAIParsing = true
+
+        Task {
+            do {
+                let response = try await GeminiService.shared.generateHTTPRequestSpec(prompt: input)
+                let spec = try viewModel.parseAISpec(from: response)
+                await MainActor.run {
+                    do {
+                        try viewModel.applyAISpec(spec)
+                        requestTab = (spec.body ?? "").isEmpty ? 0 : 1
+                        showAIParser = false
+                        aiDocument = ""
+                        ToastManager.shared.show(message: "AI request parsed", type: .success)
+                    } catch {
+                        ToastManager.shared.show(message: error.localizedDescription, type: .error)
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    ToastManager.shared.show(message: error.localizedDescription, type: .error)
+                }
+            }
+            await MainActor.run { isAIParsing = false }
+        }
     }
 }

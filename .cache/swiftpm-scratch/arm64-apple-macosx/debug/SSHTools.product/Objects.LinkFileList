@@ -1693,6 +1693,7 @@
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/AuthProfileManagerView.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/Cleanable.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ClickHouseRunner.swift.o
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConfigIO.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionRowView.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionSettingsSheet.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionsStore.swift.o
@@ -1712,6 +1713,9 @@
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/IdentifiableUUID.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/JSONDiffEditor.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/JSONFormatting.swift.o
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalPathStore.swift.o
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalRunner.swift.o
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalView.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/Localization.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/Models.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/MySQLComponents.swift.o
@@ -1740,6 +1744,7 @@
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SSHKeyUtils.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SSHRunner.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SSHToolsApp.swift.o
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SavedUploadTasksView.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SettingsManager.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SheetScaffold.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SidebarView.swift.o
@@ -1752,9 +1757,12 @@
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TabManager.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TabsView.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalAIOverlay.swift.o
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalFlowOverlay.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalOutputSink.swift.o
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalRunner.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalView.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModel.swift.o
+/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModelStore.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ToastManager.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TodoManager.swift.o
 /Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TodoReminderSheet.swift.o

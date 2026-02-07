@@ -61,6 +61,7 @@ struct ConnectionRowView: View {
     private func connectionTypeColor(for type: ConnectionType) -> Color {
         switch type {
         case .ssh: return DesignSystem.Colors.green
+        case .localTerminal: return DesignSystem.Colors.blue
         case .redis: return DesignSystem.Colors.orange
         case .mysql: return DesignSystem.Colors.blue
         case .clickhouse: return DesignSystem.Colors.purple

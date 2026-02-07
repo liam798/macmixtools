@@ -58,6 +58,13 @@
     "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/JSONFormatting.swiftdeps",
     "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/JSONFormatting.dia"
   },
+  "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/LocalTerminalRunner.swift": {
+    "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalRunner.d",
+    "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalRunner.swift.o",
+    "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalRunner~partial.swiftmodule",
+    "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalRunner.swiftdeps",
+    "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalRunner.dia"
+  },
   "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/MySQLRunner.swift": {
     "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/MySQLRunner.d",
     "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/MySQLRunner.swift.o",
@@ -121,6 +128,13 @@
     "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalOutputSink.swiftdeps",
     "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalOutputSink.dia"
   },
+  "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/TerminalRunner.swift": {
+    "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalRunner.d",
+    "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalRunner.swift.o",
+    "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalRunner~partial.swiftmodule",
+    "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalRunner.swiftdeps",
+    "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalRunner.dia"
+  },
   "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/AuthProfileManager.swift": {
     "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/AuthProfileManager.d",
     "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/AuthProfileManager.swift.o",
@@ -128,12 +142,26 @@
     "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/AuthProfileManager.swiftdeps",
     "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/AuthProfileManager.dia"
   },
+  "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ConfigIO.swift": {
+    "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConfigIO.d",
+    "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConfigIO.swift.o",
+    "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConfigIO~partial.swiftmodule",
+    "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConfigIO.swiftdeps",
+    "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConfigIO.dia"
+  },
   "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ConnectionsStore.swift": {
     "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionsStore.d",
     "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionsStore.swift.o",
     "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionsStore~partial.swiftmodule",
     "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionsStore.swiftdeps",
     "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionsStore.dia"
+  },
+  "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/LocalTerminalPathStore.swift": {
+    "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalPathStore.d",
+    "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalPathStore.swift.o",
+    "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalPathStore~partial.swiftmodule",
+    "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalPathStore.swiftdeps",
+    "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalPathStore.dia"
   },
   "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/SettingsManager.swift": {
     "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SettingsManager.d",
@@ -148,6 +176,13 @@
     "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TabManager~partial.swiftmodule",
     "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TabManager.swiftdeps",
     "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TabManager.dia"
+  },
+  "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TerminalViewModelStore.swift": {
+    "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModelStore.d",
+    "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModelStore.swift.o",
+    "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModelStore~partial.swiftmodule",
+    "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModelStore.swiftdeps",
+    "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModelStore.dia"
   },
   "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ToastManager.swift": {
     "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ToastManager.d",
@@ -471,6 +506,13 @@
     "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SFTPTableView.swiftdeps",
     "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SFTPTableView.dia"
   },
+  "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SavedUploadTasksView.swift": {
+    "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SavedUploadTasksView.d",
+    "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SavedUploadTasksView.swift.o",
+    "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SavedUploadTasksView~partial.swiftmodule",
+    "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SavedUploadTasksView.swiftdeps",
+    "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SavedUploadTasksView.dia"
+  },
   "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SyncedSFTPView.swift": {
     "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SyncedSFTPView.d",
     "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SyncedSFTPView.swift.o",
@@ -484,6 +526,13 @@
     "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SyncedSFTPViewModel~partial.swiftmodule",
     "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SyncedSFTPViewModel.swiftdeps",
     "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SyncedSFTPViewModel.dia"
+  },
+  "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/LocalTerminalView.swift": {
+    "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalView.d",
+    "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalView.swift.o",
+    "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalView~partial.swiftmodule",
+    "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalView.swiftdeps",
+    "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalView.dia"
   },
   "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/ReconnectOverlay.swift": {
     "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ReconnectOverlay.d",
@@ -512,6 +561,13 @@
     "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalAIOverlay~partial.swiftmodule",
     "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalAIOverlay.swiftdeps",
     "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalAIOverlay.dia"
+  },
+  "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalFlowOverlay.swift": {
+    "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalFlowOverlay.d",
+    "object": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalFlowOverlay.swift.o",
+    "swiftmodule": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalFlowOverlay~partial.swiftmodule",
+    "swift-dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalFlowOverlay.swiftdeps",
+    "diagnostics": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalFlowOverlay.dia"
   },
   "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalView.swift": {
     "dependencies": "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalView.d",

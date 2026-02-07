@@ -1,7 +1,10 @@
 /* Sidebar & Common */
 "Servers" = "服务器";
 "Add" = "添加";
+"Export Config" = "导出配置";
+"Import Config" = "导入配置";
 "SSH Terminal" = "SSH 终端";
+"Local Terminal" = "本地终端";
 "Redis" = "Redis";
 "Configure" = "配置";
 "Open SFTP" = "打开 SFTP";
@@ -11,6 +14,8 @@
 "Delete" = "删除";
 "Cancel" = "取消";
 "Save" = "保存";
+"Config Exported" = "配置已导出";
+"Config Imported" = "配置已导入";
 "Error" = "错误";
 
 /* Home */
@@ -40,6 +45,11 @@
 /* Terminal / Tabs */
 "Settings" = "设置";
 "No Open Tabs" = "无打开的标签页";
+"Split View" = "分屏";
+"Close Split" = "关闭分屏";
+"Reset Layout" = "重置布局";
+"Nudge Split Left" = "分屏左移";
+"Nudge Split Right" = "分屏右移";
 "Connected" = "已连接";
 "Disconnected" = "已断开";
 "Connecting to" = "正在连接";
@@ -89,6 +99,17 @@
 /* HTTP Client */
 "Tools" = "工具";
 "HTTP Client" = "HTTP 客户端";
+"Saved Uploads" = "固定上传";
+"No saved tasks" = "暂无固定任务";
+"Add Upload Task" = "新增上传任务";
+"Local File" = "本地文件";
+"Choose File" = "选择文件";
+"Remote Directory" = "远端目录";
+"SFTP not connected" = "SFTP 未连接";
+"Local file not found" = "本地文件不存在";
+"Remote directory is empty" = "远端目录为空";
+"Upload" = "上传";
+"Note" = "备注";
 "Method" = "方法";
 "URL" = "链接";
 "Send" = "发送";

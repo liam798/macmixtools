@@ -210,8 +210,8 @@ class TerminalContainer: NSView {
     }
 }
 
-struct SwiftTermView: NSViewRepresentable {
-    @ObservedObject var runner: SSHRunner
+struct SwiftTermView<Runner: TerminalRunner>: NSViewRepresentable {
+    @ObservedObject var runner: Runner
     
     func makeNSView(context: Context) -> TerminalContainer {
         let terminalView = AppTerminalView(frame: NSRect(x: 0, y: 0, width: 600, height: 400))
@@ -317,6 +317,7 @@ struct SwiftTermView: NSViewRepresentable {
         
         DispatchQueue.main.async {
             runner.terminalOutput = terminalView
+            runner.notifyTerminalReady()
         }
         
         return container
@@ -335,8 +336,8 @@ struct SwiftTermView: NSViewRepresentable {
     }
     
     class Coordinator: NSObject, TerminalViewDelegate {
-        var runner: SSHRunner
-        init(runner: SSHRunner) { self.runner = runner }
+        var runner: Runner
+        init(runner: Runner) { self.runner = runner }
         func sizeChanged(source: MacTerminalView, newCols: Int, newRows: Int) { runner.resize(cols: newCols, rows: newRows) }
         func setTerminalTitle(source: MacTerminalView, title: String) { }
         func send(source: MacTerminalView, data: ArraySlice<UInt8>) { runner.send(data: Data(data)) }

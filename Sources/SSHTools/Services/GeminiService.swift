@@ -211,4 +211,70 @@ class GeminiService {
         
         return cleanText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
+
+    func generateHTTPRequestSpec(prompt: String) async throws -> String {
+        let apiKey = SettingsManager.shared.geminiApiKey
+        guard !apiKey.isEmpty else {
+            throw NSError(domain: "GeminiService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Gemini API Key is not configured."])
+        }
+
+        let urlString = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=\(apiKey)"
+        guard let url = URL(string: urlString) else {
+            throw NSError(domain: "GeminiService", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid API URL."])
+        }
+
+        let systemPrompt = """
+        You are an API client expert. Convert the user's documentation into a single HTTP request spec in JSON.
+        Output ONLY JSON with keys: method, url, headers, body.
+        - method: HTTP verb (GET/POST/PUT/PATCH/DELETE/HEAD/OPTIONS)
+        - url: full URL, include query params if present.
+        - headers: array of {"key":"...","value":"..."}; use [] if none.
+        - body: string; use "" if none. If body is JSON, return compact JSON string.
+        If multiple endpoints, choose the primary or first.
+        Do not include markdown or code fences.
+        Documentation:
+        \(prompt)
+        """
+
+        let requestBody: [String: Any] = [
+            "contents": [
+                [
+                    "role": "user",
+                    "parts": [
+                        ["text": systemPrompt]
+                    ]
+                ]
+            ]
+        ]
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            throw NSError(domain: "GeminiService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "AI generation failed."])
+        }
+
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let candidates = json?["candidates"] as? [[String: Any]]
+        let parts = candidates?.first?["content"] as? [String: Any]
+        let textPart = (parts?["parts"] as? [[String: Any]])?.first
+        let text = textPart?["text"] as? String
+
+        var cleanText = text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if cleanText.hasPrefix("```json") {
+            cleanText = cleanText.replacingOccurrences(of: "```json", with: "")
+        }
+        if cleanText.hasPrefix("```") {
+            cleanText = cleanText.replacingOccurrences(of: "```", with: "")
+        }
+        if cleanText.hasSuffix("```") {
+            cleanText = String(cleanText.dropLast(3))
+        }
+
+        return cleanText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 }

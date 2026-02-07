@@ -4,6 +4,7 @@ import SwiftUI
 enum TabContent: Identifiable, Equatable {
     case home
     case terminal(SSHConnection)
+    case localTerminal(SSHConnection)
     case sftp(SSHConnection)
     case redis(SSHConnection)
     case mysql(SSHConnection)
@@ -15,6 +16,7 @@ enum TabContent: Identifiable, Equatable {
         switch self {
         case .home: return "home"
         case .terminal(let conn): return "terminal_\(conn.id)"
+        case .localTerminal(let conn): return "local_terminal_\(conn.id)"
         case .sftp(let conn): return "sftp_\(conn.id)"
         case .redis(let conn): return "redis_\(conn.id)"
         case .mysql(let conn): return "mysql_\(conn.id)"
@@ -28,6 +30,7 @@ enum TabContent: Identifiable, Equatable {
         switch self {
         case .home, .httpClient, .devToolbox: return nil
         case .terminal(let conn): return conn.id
+        case .localTerminal(let conn): return conn.id
         case .sftp(let conn): return conn.id
         case .redis(let conn): return conn.id
         case .mysql(let conn): return conn.id
@@ -39,6 +42,7 @@ enum TabContent: Identifiable, Equatable {
         switch self {
         case .home: return "Home".localized
         case .terminal(let conn): return conn.name
+        case .localTerminal(let conn): return conn.name
         case .sftp(let conn): return "SFTP".localized + ": \(conn.name)"
         case .redis(let conn): return "Redis".localized + ": \(conn.name)"
         case .mysql(let conn): return "MySQL: \(conn.name)"
@@ -52,6 +56,7 @@ enum TabContent: Identifiable, Equatable {
         switch self {
         case .home: return "house.fill"
         case .terminal: return "terminal"
+        case .localTerminal: return "terminal"
         case .sftp(_): return "folder"
         case .redis: return "cylinder.split.1x2"
         case .mysql: return "server.rack"
@@ -161,8 +166,14 @@ class TabManager: ObservableObject {
             }
             
         case .terminal(_):
-            // Resources are primarily handled by deinit of TerminalViewModel
-            break
+            if let connID = content.connectionID {
+                TerminalViewModelStore.shared.remove(connectionID: connID)
+            }
+            TerminalWebViewStore.shared.remove(tabID: excludingTabID)
+
+        case .localTerminal(_):
+            // Resources are primarily handled by deinit of LocalTerminalViewModel
+            TerminalWebViewStore.shared.remove(tabID: excludingTabID)
             
         case .sftp(_):
             // Resources are primarily handled by deinit of SyncedSFTPViewModel or shared with Terminal
@@ -193,6 +204,8 @@ class TabManager: ObservableObject {
                     continue // Should not happen given connectionID check
                 case .terminal:
                     newContent = .terminal(updatedConnection)
+                case .localTerminal:
+                    newContent = .localTerminal(updatedConnection)
                 case .sftp:
                     newContent = .sftp(updatedConnection)
                 case .redis:

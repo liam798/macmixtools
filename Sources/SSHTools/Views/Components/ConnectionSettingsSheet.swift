@@ -46,57 +46,65 @@ struct ConnectionSettingsSheet: View {
         .sheet(isPresented: $showProfileManager) { AuthProfileManagerView() }
     }
 
+    @ViewBuilder
     private var generalSection: some View {
         FormSection(title: "General".localized, systemImage: "desktopcomputer") {
             VStack(spacing: DesignSystem.Spacing.small) {
                 TextField("Name".localized, text: $connection.name)
                     .textFieldStyle(ModernTextFieldStyle(icon: "tag"))
 
-                HStack(spacing: DesignSystem.Spacing.small) {
-                    TextField("Host".localized, text: $connection.host)
-                        .textFieldStyle(ModernTextFieldStyle(icon: "network"))
+                if connection.type != .localTerminal {
+                    HStack(spacing: DesignSystem.Spacing.small) {
+                        TextField("Host".localized, text: $connection.host)
+                            .textFieldStyle(ModernTextFieldStyle(icon: "network"))
 
-                    TextField("Port".localized, text: $connection.port)
-                        .textFieldStyle(ModernTextFieldStyle(icon: "number"))
-                        .frame(width: 100)
+                        TextField("Port".localized, text: $connection.port)
+                            .textFieldStyle(ModernTextFieldStyle(icon: "number"))
+                            .frame(width: 100)
+                    }
                 }
             }
         }
     }
 
+    @ViewBuilder
     private var authenticationSection: some View {
-        FormSection(title: "Authentication".localized, systemImage: "lock.shield") {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Auth Profile".localized)
-                    .font(DesignSystem.Typography.caption)
-                    .foregroundColor(.secondary)
+        if connection.type == .localTerminal {
+            EmptyView()
+        } else {
+            FormSection(title: "Authentication".localized, systemImage: "lock.shield") {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Auth Profile".localized)
+                        .font(DesignSystem.Typography.caption)
+                        .foregroundColor(.secondary)
 
-                Picker("", selection: $connection.authProfileId) {
-                    Text("Custom (Manual)".localized).tag(nil as UUID?)
-                    Divider()
-                    ForEach(authManager.profiles) { profile in
-                        Text(profile.alias).tag(profile.id as UUID?)
+                    Picker("", selection: $connection.authProfileId) {
+                        Text("Custom (Manual)".localized).tag(nil as UUID?)
+                        Divider()
+                        ForEach(authManager.profiles) { profile in
+                            Text(profile.alias).tag(profile.id as UUID?)
+                        }
+                    }
+                    .labelsHidden()
+                    .onChange(of: connection.authProfileId) { _, newValue in
+                        if let profileId = newValue, let profile = authManager.profiles.first(where: { $0.id == profileId }) {
+                            connection.username = profile.username
+                            connection.useKey = profile.useKey
+                            connection.keyPath = profile.keyPath
+                            connection.password = profile.password
+                            connection.keyPassphrase = profile.keyPassphrase
+                        }
                     }
                 }
-                .labelsHidden()
-                .onChange(of: connection.authProfileId) { _, newValue in
-                    if let profileId = newValue, let profile = authManager.profiles.first(where: { $0.id == profileId }) {
-                        connection.username = profile.username
-                        connection.useKey = profile.useKey
-                        connection.keyPath = profile.keyPath
-                        connection.password = profile.password
-                        connection.keyPassphrase = profile.keyPassphrase
-                    }
+
+                Divider().padding(.vertical, 4)
+
+                if connection.authProfileId == nil {
+                    manualCredentialsSection
+                } else if let profileId = connection.authProfileId,
+                          let profile = authManager.profiles.first(where: { $0.id == profileId }) {
+                    profileSummarySection(profile: profile)
                 }
-            }
-
-            Divider().padding(.vertical, 4)
-
-            if connection.authProfileId == nil {
-                manualCredentialsSection
-            } else if let profileId = connection.authProfileId,
-                      let profile = authManager.profiles.first(where: { $0.id == profileId }) {
-                profileSummarySection(profile: profile)
             }
         }
     }

@@ -1,7 +1,10 @@
 /* Sidebar & Common */
 "Servers" = "Servers";
 "Add" = "Add";
+"Export Config" = "Export Config";
+"Import Config" = "Import Config";
 "SSH Terminal" = "SSH Terminal";
+"Local Terminal" = "Local Terminal";
 "Redis" = "Redis";
 "Configure" = "Configure";
 "Open SFTP" = "Open SFTP";
@@ -11,6 +14,8 @@
 "Delete" = "Delete";
 "Cancel" = "Cancel";
 "Save" = "Save";
+"Config Exported" = "Config Exported";
+"Config Imported" = "Config Imported";
 "Error" = "Error";
 
 /* Home */
@@ -40,6 +45,11 @@
 /* Terminal / Tabs */
 "Settings" = "Settings";
 "No Open Tabs" = "No Open Tabs";
+"Split View" = "Split View";
+"Close Split" = "Close Split";
+"Reset Layout" = "Reset Layout";
+"Nudge Split Left" = "Nudge Split Left";
+"Nudge Split Right" = "Nudge Split Right";
 "Connected" = "Connected";
 "Disconnected" = "Disconnected";
 "Connecting to" = "Connecting to";
@@ -89,6 +99,17 @@
 /* HTTP Client */
 "Tools" = "Tools";
 "HTTP Client" = "HTTP Client";
+"Saved Uploads" = "Saved Uploads";
+"No saved tasks" = "No saved tasks";
+"Add Upload Task" = "Add Upload Task";
+"Local File" = "Local File";
+"Choose File" = "Choose File";
+"Remote Directory" = "Remote Directory";
+"SFTP not connected" = "SFTP not connected";
+"Local file not found" = "Local file not found";
+"Remote directory is empty" = "Remote directory is empty";
+"Upload" = "Upload";
+"Note" = "Note";
 "Method" = "Method";
 "URL" = "URL";
 "Send" = "Send";

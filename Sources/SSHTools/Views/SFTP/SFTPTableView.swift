@@ -62,6 +62,8 @@ struct SFTPTableView: NSViewRepresentable {
         tableView.dataSource = context.coordinator
         tableView.delegate = context.coordinator
         tableView.dragSelectionDelegate = context.coordinator
+        tableView.target = context.coordinator
+        tableView.action = #selector(Coordinator.handleClick(_:))
         tableView.doubleAction = #selector(Coordinator.handleDoubleClick(_:))
 
         let scrollView = NSScrollView()
@@ -233,6 +235,7 @@ struct SFTPTableView: NSViewRepresentable {
             let menu = NSMenu()
 
             if selectedCount > 1 {
+                menu.addItem(NSMenuItem(title: "Upload to Current Directory", action: #selector(uploadToCurrentDirectory(_:)), keyEquivalent: ""))
                 menu.addItem(NSMenuItem(title: "Download", action: #selector(downloadSelected(_:)), keyEquivalent: ""))
                 let del = NSMenuItem(title: "Delete", action: #selector(deleteSelected(_:)), keyEquivalent: "")
                 menu.addItem(del)
@@ -240,11 +243,16 @@ struct SFTPTableView: NSViewRepresentable {
                 return menu
             }
 
-            guard row >= 0, row < viewModel.files.count else { return menu }
+            guard row >= 0, row < viewModel.files.count else {
+                menu.addItem(NSMenuItem(title: "Upload to Current Directory", action: #selector(uploadToCurrentDirectory(_:)), keyEquivalent: ""))
+                menu.items.forEach { $0.target = self }
+                return menu
+            }
             let file = viewModel.files[row]
 
+            menu.addItem(NSMenuItem(title: "Upload to Current Directory", action: #selector(uploadToCurrentDirectory(_:)), keyEquivalent: ""))
             menu.addItem(NSMenuItem(title: "Rename", action: #selector(rename(_:)), keyEquivalent: ""))
-            menu.addItem(NSMenuItem(title: "Copy Path", action: #selector(copyPath(_:)), keyEquivalent: ""))
+            menu.addItem(NSMenuItem(title: "Copy Full Path", action: #selector(copyPath(_:)), keyEquivalent: ""))
 
             let del = NSMenuItem(title: "Delete", action: #selector(deleteOne(_:)), keyEquivalent: "")
             menu.addItem(del)
@@ -267,7 +275,28 @@ struct SFTPTableView: NSViewRepresentable {
             let file = viewModel.files[row]
             guard file.isDirectory else { return }
             let fullPath = viewModel.path.hasSuffix("/") ? viewModel.path + file.name : viewModel.path + "/" + file.name
-            onNavigate(fullPath)
+            viewModel.navigate(to: fullPath)
+        }
+
+        @objc func handleClick(_ sender: Any?) {
+            guard let tableView else { return }
+            guard let event = NSApp.currentEvent,
+                  event.type == .leftMouseUp || event.type == .leftMouseDown,
+                  event.clickCount == 1
+            else { return }
+
+            // Respect modifier-assisted multi-select clicks; only navigate on a plain click.
+            if !event.modifierFlags.intersection([.command, .shift, .option, .control]).isEmpty {
+                return
+            }
+
+            let row = tableView.clickedRow
+            guard row >= 0, row < viewModel.files.count else { return }
+            let file = viewModel.files[row]
+            guard file.isDirectory else { return }
+
+            let fullPath = viewModel.path.hasSuffix("/") ? viewModel.path + file.name : viewModel.path + "/" + file.name
+            viewModel.navigate(to: fullPath)
         }
 
         private func fileForClickedRow() -> RemoteFile? {
@@ -317,6 +346,16 @@ struct SFTPTableView: NSViewRepresentable {
         @objc func downloadOne(_ sender: Any?) {
             guard let file = fileForClickedRow() else { return }
             viewModel.download(file: file)
+        }
+
+        @objc func uploadToCurrentDirectory(_ sender: Any?) {
+            let panel = NSOpenPanel()
+            panel.canChooseFiles = true
+            panel.canChooseDirectories = false
+            panel.allowsMultipleSelection = false
+            if panel.runModal() == .OK, let url = panel.url {
+                viewModel.uploadFile(from: url)
+            }
         }
     }
 }

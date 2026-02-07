@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SidebarView: View {
     @ObservedObject var store: ConnectionsStore
@@ -46,6 +47,23 @@ struct SidebarView: View {
             .padding(8)
             .background(Color.primary.opacity(0.05))
             .cornerRadius(8)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
+
+            HStack(spacing: 8) {
+                SidebarActionButton(
+                    icon: "square.and.arrow.up",
+                    label: "Export Config".localized,
+                    color: DesignSystem.Colors.blue,
+                    action: exportConfig
+                )
+                SidebarActionButton(
+                    icon: "square.and.arrow.down",
+                    label: "Import Config".localized,
+                    color: DesignSystem.Colors.green,
+                    action: importConfig
+                )
+            }
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
             
@@ -136,13 +154,17 @@ struct SidebarView: View {
     private func addConnection(type: ConnectionType) {
         var newConnection = SSHConnection(
             name: type == .ssh ? "New Server" :
-                (type == .redis ? "New Redis" :
-                    (type == .clickhouse ? "New ClickHouse" : "New MySQL")),
+                (type == .localTerminal ? "Local Terminal" :
+                    (type == .redis ? "New Redis" :
+                        (type == .clickhouse ? "New ClickHouse" : "New MySQL"))),
             host: "",
             username: ""
         )
         newConnection.type = type
-        if type == .redis {
+        if type == .localTerminal {
+            newConnection.port = ""
+            newConnection.username = ""
+        } else if type == .redis {
             newConnection.port = AppConstants.Ports.redis
             newConnection.username = "" 
         } else if type == .mysql {
@@ -153,6 +175,37 @@ struct SidebarView: View {
         store.connections.append(newConnection)
         selection = newConnection.id
         editingConnectionID = IdentifiableUUID(id: newConnection.id)
+    }
+
+    private func exportConfig() {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.json]
+        panel.nameFieldStringValue = "sshtools-config.json"
+        panel.canCreateDirectories = true
+        if panel.runModal() == .OK, let url = panel.url {
+            do {
+                try ConfigIO.exportToURL(url, store: store)
+                ToastManager.shared.show(message: "Config Exported".localized, type: .success)
+            } catch {
+                ToastManager.shared.show(message: error.localizedDescription, type: .error)
+            }
+        }
+    }
+
+    private func importConfig() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        if panel.runModal() == .OK, let url = panel.url {
+            do {
+                let snapshot = try ConfigIO.importFromURL(url)
+                ConfigIO.applySnapshot(snapshot, to: store)
+                ToastManager.shared.show(message: "Config Imported".localized, type: .success)
+            } catch {
+                ToastManager.shared.show(message: error.localizedDescription, type: .error)
+            }
+        }
     }
 }
 
@@ -212,6 +265,7 @@ private struct ConnectionItemRow: View {
     @Binding var editingConnectionID: IdentifiableUUID?
     @ObservedObject var tabManager: TabManager
     let onDelete: () -> Void
+    @ObservedObject private var localPathStore = LocalTerminalPathStore.shared
     
     var body: some View {
         HStack(spacing: 12) {
@@ -223,10 +277,12 @@ private struct ConnectionItemRow: View {
                 Text(connection.name)
                     .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
                     .lineLimit(1)
-                Text(connection.host)
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
+                if let subtitle = subtitleText, !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
             }
             Spacer()
         }
@@ -245,6 +301,13 @@ private struct ConnectionItemRow: View {
             }
         }
     }
+
+    private var subtitleText: String? {
+        if connection.type == .localTerminal {
+            return localPathStore.path(for: connection.id) ?? connection.host
+        }
+        return connection.host
+    }
 }
 
 private struct SidebarAddMenu: View {
@@ -259,6 +322,9 @@ private struct SidebarAddMenu: View {
             Divider()
             Button(action: { onAdd(.ssh) }) {
                 Label("SSH Terminal".localized, systemImage: "terminal.fill")
+            }
+            Button(action: { onAdd(.localTerminal) }) {
+                Label("Local Terminal".localized, systemImage: "terminal")
             }
             Button(action: { onAdd(.redis) }) {
                 Label("Redis".localized, systemImage: "cylinder.split.1x2.fill")

@@ -1,28 +1,31 @@
 import SwiftUI
+import AppKit
 
 struct VerticalDraggableSplitter: View {
     @Binding var isDragging: Bool
     
     var body: some View {
         ZStack {
-            // Invisible divider line
             Rectangle()
-                .fill(isDragging ? DesignSystem.Colors.blue : DesignSystem.Colors.border)
-                .frame(width: 1)
+                .fill(DesignSystem.Colors.border)
+                .frame(width: 2)
             
-            // Highlight when dragging
             if isDragging {
                 Rectangle()
                     .fill(DesignSystem.Colors.blue)
-                    .frame(width: 2)
+                    .frame(width: 3)
+            } else {
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(DesignSystem.Colors.textSecondary.opacity(0.25))
+                    .frame(width: 3, height: 36)
             }
         }
-        .frame(width: 8)
+        .frame(width: DesignSystem.Layout.sidebarSplitterWidth)
         .onHover { inside in
             if inside {
-                NSCursor.resizeLeftRight.push()
+                NSCursor.resizeLeftRight.set()
             } else {
-                NSCursor.pop()
+                NSCursor.arrow.set()
             }
         }
         .zIndex(100)

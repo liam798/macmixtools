@@ -70,6 +70,13 @@ class SettingsManager: ObservableObject {
             UserDefaults.standard.set(sftpDownloadChunkMB, forKey: "sftp_download_chunk_mb")
         }
     }
+
+    /// SFTP upload chunk size in MB (tunable for throughput vs memory/latency).
+    @Published var sftpUploadChunkMB: Int {
+        didSet {
+            UserDefaults.standard.set(sftpUploadChunkMB, forKey: "sftp_upload_chunk_mb")
+        }
+    }
     
     // MARK: - Proxy Settings
     @Published var enableLocalProxy: Bool {
@@ -107,6 +114,9 @@ class SettingsManager: ObservableObject {
 
         let savedChunk = UserDefaults.standard.integer(forKey: "sftp_download_chunk_mb")
         self.sftpDownloadChunkMB = savedChunk <= 0 ? 4 : savedChunk
+
+        let savedUploadChunk = UserDefaults.standard.integer(forKey: "sftp_upload_chunk_mb")
+        self.sftpUploadChunkMB = savedUploadChunk <= 0 ? 4 : savedUploadChunk
         
         self.enableLocalProxy = UserDefaults.standard.bool(forKey: "enable_local_proxy")
         self.localProxyHost = UserDefaults.standard.string(forKey: "local_proxy_host") ?? "127.0.0.1"
@@ -116,6 +126,12 @@ class SettingsManager: ObservableObject {
     var sftpDownloadChunkBytes: UInt32 {
         // Clamp to a reasonable range so users can't accidentally set something huge.
         let mb = min(max(sftpDownloadChunkMB, 1), 16)
+        return UInt32(mb) * 1024 * 1024
+    }
+
+    var sftpUploadChunkBytes: UInt32 {
+        // Clamp to a reasonable range so users can't accidentally set something huge.
+        let mb = min(max(sftpUploadChunkMB, 1), 16)
         return UInt32(mb) * 1024 * 1024
     }
     

@@ -38,7 +38,18 @@ class SyncedSFTPViewModel: ObservableObject {
     private var refreshGeneration: UInt64 = 0
     private let refreshRequests = PassthroughSubject<Void, Never>()
     private var lastListedPath: String?
+    private var didFallbackToRoot = false
+    private let persistenceKeyPrefix = "sshtools.sftp.lastPath."
     
+    private func normalizedPath(_ input: String) -> String {
+        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "/" }
+        if trimmed.hasPrefix("/") { return trimmed }
+        let base = path.isEmpty ? "/" : path
+        if base == "/" { return "/" + trimmed }
+        return base.hasSuffix("/") ? base + trimmed : base + "/" + trimmed
+    }
+
     init(runner: SSHRunner, path: String, onNavigate: @escaping (String) -> Void) {
         self.runner = runner
         self.path = path.isEmpty ? "/" : path
@@ -57,6 +68,7 @@ class SyncedSFTPViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] sftp in
                 if sftp != nil {
+                    self?.restoreLastPathIfNeeded()
                     self?.requestRefresh()
                 }
             }
@@ -69,6 +81,9 @@ class SyncedSFTPViewModel: ObservableObject {
             .debounce(for: .milliseconds(150), scheduler: RunLoop.main)
             .sink { [weak self] cleanPath in
                 guard let self = self else { return }
+                if self.runner.isRestoringPath {
+                    return
+                }
                 if self.path != cleanPath {
                     Logger.log("SFTP: Syncing path from terminal: \(cleanPath)", level: .info)
                     self.path = cleanPath
@@ -82,6 +97,21 @@ class SyncedSFTPViewModel: ObservableObject {
             .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.applyFiltersAndSort()
+            }
+            .store(in: &cancellables)
+
+        // Listen to explicit path change notifications (e.g., parsed cd output)
+        NotificationCenter.default.publisher(for: .sshtoolsCurrentPathChanged)
+            .compactMap { $0.object as? String }
+            .receive(on: RunLoop.main)
+            .sink { [weak self] newPath in
+                guard let self else { return }
+                let clean = newPath.isEmpty ? "/" : newPath
+                if self.path != clean {
+                    self.path = clean
+                    self.requestRefresh(immediate: true)
+                }
+                self.persistPath()
             }
             .store(in: &cancellables)
     }
@@ -154,6 +184,15 @@ class SyncedSFTPViewModel: ObservableObject {
         requestRefresh(immediate: true)
     }
 
+    func navigate(to rawPath: String) {
+        let resolved = normalizedPath(rawPath)
+        if path != resolved {
+            path = resolved
+        }
+        onNavigate(resolved)
+        requestRefresh(immediate: true)
+    }
+
     private func requestRefresh(immediate: Bool = false) {
         if immediate {
             refreshNow()
@@ -187,20 +226,62 @@ class SyncedSFTPViewModel: ObservableObject {
                 if Task.isCancelled { return }
                 await MainActor.run {
                     guard gen == self.refreshGeneration else { return }
+                    self.didFallbackToRoot = false
                     self.rawFiles = mappedFiles
                     self.lastListedPath = requestedPath
                     self.applyFiltersAndSort()
                     self.isLoading = false
+                    self.persistPath()
                 }
             } catch {
                 if Task.isCancelled { return }
                 await MainActor.run {
                     guard gen == self.refreshGeneration else { return }
+                    if let status = error as? SFTPMessage.Status {
+                        if status.errorCode == .eof {
+                            // Treat EOF as empty directory
+                            self.rawFiles = []
+                            self.applyFiltersAndSort()
+                            self.isLoading = false
+                            return
+                        }
+                        if status.errorCode == .noSuchFile {
+                            // Fallback to root once to recover from invalid path
+                            if !self.didFallbackToRoot {
+                                self.didFallbackToRoot = true
+                                self.path = "/"
+                                self.requestRefresh(immediate: true)
+                                return
+                            }
+                        }
+                    }
                     self.errorMessage = "Failed to list files: \(error.localizedDescription)"
                     self.isLoading = false
                 }
             }
         }
+    }
+
+    private func persistPath() {
+        guard let connectionID = runner.connectionID else { return }
+        let key = persistenceKeyPrefix + connectionID.uuidString
+        let clean = path.trimmingCharacters(in: .whitespacesAndNewlines)
+        UserDefaults.standard.set(clean, forKey: key)
+    }
+
+    private func restoreLastPathIfNeeded() {
+        guard let connectionID = runner.connectionID else { return }
+        let key = persistenceKeyPrefix + connectionID.uuidString
+        if let stored = UserDefaults.standard.string(forKey: key)?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+           !stored.isEmpty {
+            path = stored
+            editedPathIfExists(stored)
+        }
+    }
+
+    private func editedPathIfExists(_ newPath: String) {
+        // No-op helper to keep symmetric with future UI needs
     }
     
     func deleteSelectedFiles() {

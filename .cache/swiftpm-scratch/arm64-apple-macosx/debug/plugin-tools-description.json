@@ -248,8 +248,8 @@
     }
   },
   "generatedSourceTargetSet" : [
-    "GenerateManual",
-    "GenerateDoccReference"
+    "GenerateDoccReference",
+    "GenerateManual"
   ],
   "pluginDescriptions" : [
     {
@@ -21111,6 +21111,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/LocalTerminalRunner.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/MySQLRunner.swift"
         },
         {
@@ -21147,11 +21151,23 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/TerminalRunner.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/AuthProfileManager.swift"
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ConfigIO.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ConnectionsStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/LocalTerminalPathStore.swift"
         },
         {
           "kind" : "file",
@@ -21160,6 +21176,10 @@
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TabManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TerminalViewModelStore.swift"
         },
         {
           "kind" : "file",
@@ -21347,11 +21367,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SavedUploadTasksView.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SyncedSFTPView.swift"
         },
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SyncedSFTPViewModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/LocalTerminalView.swift"
         },
         {
           "kind" : "file",
@@ -21368,6 +21396,10 @@
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalAIOverlay.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalFlowOverlay.swift"
         },
         {
           "kind" : "file",
@@ -21426,6 +21458,7 @@
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ClickHouseRunner.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/GeminiService.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/JSONFormatting.swift.o",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalRunner.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/MySQLRunner.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ProxyConnector.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/RedisClient.swift.o",
@@ -21435,10 +21468,14 @@
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SSHRunner.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SystemMonitor.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalOutputSink.swift.o",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalRunner.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/AuthProfileManager.swift.o",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConfigIO.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionsStore.swift.o",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalPathStore.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SettingsManager.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TabManager.swift.o",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModelStore.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ToastManager.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TodoManager.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TransferManager.swift.o",
@@ -21485,12 +21522,15 @@
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/RedisView.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/RedisViewModel.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SFTPTableView.swift.o",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SavedUploadTasksView.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SyncedSFTPView.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SyncedSFTPViewModel.swift.o",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalView.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ReconnectOverlay.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SwiftTermOutputSink.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SwiftTermWrapper.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalAIOverlay.swift.o",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalFlowOverlay.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalView.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModel.swift.o",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/XTermWebView.swift.o",
@@ -21671,6 +21711,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalRunner.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/MySQLRunner.swift.o"
         },
         {
@@ -21707,11 +21751,23 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalRunner.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/AuthProfileManager.swift.o"
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConfigIO.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionsStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalPathStore.swift.o"
         },
         {
           "kind" : "file",
@@ -21720,6 +21776,10 @@
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TabManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModelStore.swift.o"
         },
         {
           "kind" : "file",
@@ -21907,11 +21967,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SavedUploadTasksView.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SyncedSFTPView.swift.o"
         },
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SyncedSFTPViewModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalView.swift.o"
         },
         {
           "kind" : "file",
@@ -21928,6 +21996,10 @@
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalAIOverlay.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalFlowOverlay.swift.o"
         },
         {
           "kind" : "file",
@@ -21960,6 +22032,7 @@
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/ClickHouseRunner.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/GeminiService.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/JSONFormatting.swift",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/LocalTerminalRunner.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/MySQLRunner.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/ProxyConnector.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/RedisClient.swift",
@@ -21969,10 +22042,14 @@
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/SSHRunner.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/SystemMonitor.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/TerminalOutputSink.swift",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/TerminalRunner.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/AuthProfileManager.swift",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ConfigIO.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ConnectionsStore.swift",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/LocalTerminalPathStore.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/SettingsManager.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TabManager.swift",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TerminalViewModelStore.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ToastManager.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TodoManager.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TransferManager.swift",
@@ -22019,12 +22096,15 @@
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Redis/RedisView.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Redis/RedisViewModel.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SFTPTableView.swift",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SavedUploadTasksView.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SyncedSFTPView.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SyncedSFTPViewModel.swift",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/LocalTerminalView.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/ReconnectOverlay.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/SwiftTermOutputSink.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/SwiftTermWrapper.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalAIOverlay.swift",
+        "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalFlowOverlay.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalView.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalViewModel.swift",
         "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/XTermWebView.swift",
@@ -34855,6 +34935,7 @@
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/ClickHouseRunner.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/GeminiService.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/JSONFormatting.swift",
+      "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/LocalTerminalRunner.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/MySQLRunner.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/ProxyConnector.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/RedisClient.swift",
@@ -34864,10 +34945,14 @@
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/SSHRunner.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/SystemMonitor.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/TerminalOutputSink.swift",
+      "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/TerminalRunner.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/AuthProfileManager.swift",
+      "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ConfigIO.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ConnectionsStore.swift",
+      "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/LocalTerminalPathStore.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/SettingsManager.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TabManager.swift",
+      "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TerminalViewModelStore.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ToastManager.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TodoManager.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TransferManager.swift",
@@ -34914,12 +34999,15 @@
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Redis/RedisView.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Redis/RedisViewModel.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SFTPTableView.swift",
+      "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SavedUploadTasksView.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SyncedSFTPView.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SyncedSFTPViewModel.swift",
+      "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/LocalTerminalView.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/ReconnectOverlay.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/SwiftTermOutputSink.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/SwiftTermWrapper.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalAIOverlay.swift",
+      "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalFlowOverlay.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalView.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalViewModel.swift",
       "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/XTermWebView.swift",
@@ -47775,6 +47863,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/LocalTerminalRunner.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/MySQLRunner.swift"
         },
         {
@@ -47811,11 +47903,23 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Services/TerminalRunner.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/AuthProfileManager.swift"
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ConfigIO.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/ConnectionsStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/LocalTerminalPathStore.swift"
         },
         {
           "kind" : "file",
@@ -47824,6 +47928,10 @@
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TabManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Store/TerminalViewModelStore.swift"
         },
         {
           "kind" : "file",
@@ -48011,11 +48119,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SavedUploadTasksView.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SyncedSFTPView.swift"
         },
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/SFTP/SyncedSFTPViewModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/LocalTerminalView.swift"
         },
         {
           "kind" : "file",
@@ -48032,6 +48148,10 @@
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalAIOverlay.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/Sources/SSHTools/Views/Terminal/TerminalFlowOverlay.swift"
         },
         {
           "kind" : "file",
@@ -54841,6 +54961,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConfigIO.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/ConnectionRowView.swift.o"
         },
         {
@@ -54914,6 +55038,18 @@
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/JSONFormatting.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalPathStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalRunner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/LocalTerminalView.swift.o"
         },
         {
           "kind" : "file",
@@ -55029,6 +55165,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SavedUploadTasksView.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/SettingsManager.swift.o"
         },
         {
@@ -55077,7 +55217,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalFlowOverlay.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalOutputSink.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalRunner.swift.o"
         },
         {
           "kind" : "file",
@@ -55086,6 +55234,10 @@
         {
           "kind" : "file",
           "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/weijiangming/codex/mac_application/ssh_tools/SSHTools/.cache/swiftpm-scratch/arm64-apple-macosx/debug/SSHTools.build/TerminalViewModelStore.swift.o"
         },
         {
           "kind" : "file",

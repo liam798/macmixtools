@@ -4,7 +4,9 @@ enum DownloadStatus: Equatable {
     case none
     case queuing
     case transferring
+    case paused
     case completed
+    case cancelled
     case failed(String)
     
     var title: String {
@@ -12,7 +14,9 @@ enum DownloadStatus: Equatable {
         case .none: return "Idle"
         case .queuing: return "Queuing"
         case .transferring: return "Transferring"
+        case .paused: return "Paused"
         case .completed: return "Completed"
+        case .cancelled: return "Cancelled"
         case .failed(let msg): return "Failed: \(msg)"
         }
     }
@@ -22,7 +26,9 @@ enum DownloadStatus: Equatable {
         case (.none, .none): return true
         case (.queuing, .queuing): return true
         case (.transferring, .transferring): return true
+        case (.paused, .paused): return true
         case (.completed, .completed): return true
+        case (.cancelled, .cancelled): return true
         case (.failed(let lhsError), .failed(let rhsError)): return lhsError == rhsError
         default: return false
         }
@@ -31,6 +37,7 @@ enum DownloadStatus: Equatable {
 
 enum ConnectionType: String, Codable, CaseIterable, Identifiable {
     case ssh
+    case localTerminal
     case redis
     case mysql
     case clickhouse
@@ -39,6 +46,7 @@ enum ConnectionType: String, Codable, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .ssh: return "terminal.fill"
+        case .localTerminal: return "terminal"
         case .redis: return "cylinder.split.1x2.fill"
         case .mysql: return "server.rack"
         case .clickhouse: return "server.rack"
@@ -61,6 +69,9 @@ struct TransferTask: Identifiable {
     var status: DownloadStatus = .queuing
     var totalSize: Int64 = 0
     var transferredSize: Int64 = 0
+    var startTime: Date = Date()
+    var lastUpdateTime: Date = Date()
+    var speedBytesPerSec: Double = 0
 }
 
 class RemoteFile: Identifiable, ObservableObject {

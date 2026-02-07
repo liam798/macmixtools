@@ -34,6 +34,8 @@ enum AppConstants {
     /// UI 相关
     enum UI {
         static let maxOpenTabs = 5
+        /// 单个标签页下内容区域的最大分屏数
+        static let maxContentSplits = 3
         static let cursorBlinkInterval = 0.6
         static let tableMaxWidth: CGFloat = 1200
         static let searchDebounceInterval: TimeInterval = 0.3
@@ -57,6 +59,10 @@ enum AppConstants {
     enum Keychain {
         static let service = "com.sshtools.connection.password"
     }
+}
+
+extension Notification.Name {
+    static let sshtoolsCurrentPathChanged = Notification.Name("sshtools.currentPath.changed")
 }
 
 /// 日志工具（用于替换 print 语句）

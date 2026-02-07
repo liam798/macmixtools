@@ -53,6 +53,11 @@ final class ConnectionsStore: ObservableObject {
            let decoded = try? JSONDecoder().decode([ConnectionGroup].self, from: data) {
             self.groups = decoded
         }
+
+        let localPaths = LocalTerminalPathStore.shared
+        for connection in connections where connection.type == .localTerminal {
+            localPaths.loadPersistedPath(for: connection.id)
+        }
     }
 
     private func performSave() {
@@ -75,9 +80,13 @@ final class ConnectionsStore: ObservableObject {
     
     func deleteConnection(id: UUID) {
         if let index = connections.firstIndex(where: { $0.id == id }) {
+            let deleted = connections[index]
             connections.remove(at: index)
             for i in groups.indices {
                 groups[i].connectionIds.removeAll { $0 == id }
+            }
+            if deleted.type == .localTerminal {
+                LocalTerminalPathStore.shared.removePath(for: id)
             }
         }
     }

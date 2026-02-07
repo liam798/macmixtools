@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import Citadel
 
 class TerminalViewModel: ObservableObject {
     let connection: SSHConnection
@@ -18,16 +19,28 @@ class TerminalViewModel: ObservableObject {
     @Published var aiPrompt = ""
     @Published var isAIGenerating = false
     @Published var aiSteps: [AIStep] = []
+
+    @Published var showFlowPanel = false
+    @Published var flowGroups: [TerminalFlowGroup] = []
+    @Published var isFlowRunning = false
+    @Published var stopFlowOnError = true
     
     @Published var showSuccessBanner = false
     
     private var cancellables = Set<AnyCancellable>()
+    private var flowExecutionTask: Task<Void, Never>?
+    private let flowStorageKey: String
+    private let stopOnErrorKey: String
     
     init(connection: SSHConnection) {
         self.connection = connection
         let runner = SSHRunner()
         self.runner = runner
         self.monitorService = SystemMonitorService(runner: runner)
+        let baseKey = "sshtools.flow.\(connection.id.uuidString)"
+        self.flowStorageKey = baseKey + ".groups"
+        self.stopOnErrorKey = baseKey + ".stopOnError"
+        loadFlowSteps()
         
         // Forward runner changes to ViewModel to trigger View updates
         runner.objectWillChange
@@ -47,6 +60,20 @@ class TerminalViewModel: ObservableObject {
                         }
                     }
                 }
+            }
+            .store(in: &cancellables)
+
+        $flowGroups
+            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.saveFlowSteps()
+            }
+            .store(in: &cancellables)
+
+        $stopFlowOnError
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                self?.saveFlowSteps()
             }
             .store(in: &cancellables)
     }
@@ -169,6 +196,41 @@ class TerminalViewModel: ObservableObject {
             }
         }
     }
+
+    func executeFlowStep(_ step: TerminalFlowStep, in groupID: UUID) {
+        flowExecutionTask?.cancel()
+        flowExecutionTask = Task { [weak self] in
+            await self?.resetFlowStepStatus(step.id, in: groupID)
+            await self?.setFlowRunning(true)
+            _ = await self?.runFlowStep(step, in: groupID)
+            await self?.setFlowRunning(false)
+        }
+    }
+
+    func executeFlowGroup(_ group: TerminalFlowGroup) {
+        flowExecutionTask?.cancel()
+        flowExecutionTask = Task { [weak self] in
+            await self?.resetFlowGroupStatus(group.id)
+            await self?.setFlowRunning(true)
+            _ = await self?.runFlowSteps(group.steps, in: group.id)
+            await self?.setFlowRunning(false)
+        }
+    }
+
+    func executeAllFlowGroups() {
+        flowExecutionTask?.cancel()
+        flowExecutionTask = Task { [weak self] in
+            guard let self else { return }
+            await resetAllFlowStatuses()
+            await setFlowRunning(true)
+            for group in self.flowGroups {
+                if Task.isCancelled { break }
+                let shouldContinue = await self.runFlowSteps(group.steps, in: group.id)
+                if Task.isCancelled || (!shouldContinue && self.stopFlowOnError) { break }
+            }
+            await setFlowRunning(false)
+        }
+    }
     
     func updateLayout(translation: CGFloat, isEnded: Bool) {
         if isEnded {
@@ -199,6 +261,153 @@ class TerminalViewModel: ObservableObject {
                 lastSftpHeight = max(sftpHeight, 200)
                 sftpHeight = DesignSystem.Layout.sftpMinHeight
             }
+        }
+    }
+
+    private func loadFlowSteps() {
+        if let stored = UserDefaults.standard.object(forKey: stopOnErrorKey) as? Bool {
+            stopFlowOnError = stored
+        }
+
+        if let data = UserDefaults.standard.data(forKey: flowStorageKey) {
+            if let decoded = try? JSONDecoder().decode([TerminalFlowGroup].self, from: data) {
+                flowGroups = decoded
+                return
+            }
+            if let decodedSteps = try? JSONDecoder().decode([TerminalFlowStep].self, from: data) {
+                flowGroups = [TerminalFlowGroup(name: "Default", steps: decodedSteps)]
+                return
+            }
+        }
+
+        // Legacy fallback: migrate old global storage if present
+        if let legacy = UserDefaults.standard.data(forKey: "sshtools.flow.global"),
+           let decoded = try? JSONDecoder().decode([TerminalFlowGroup].self, from: legacy) {
+            flowGroups = decoded
+        }
+    }
+
+    private func saveFlowSteps() {
+        guard let data = try? JSONEncoder().encode(flowGroups) else { return }
+        UserDefaults.standard.set(data, forKey: flowStorageKey)
+        UserDefaults.standard.set(stopFlowOnError, forKey: stopOnErrorKey)
+    }
+
+    private func runFlowSteps(_ steps: [TerminalFlowStep], in groupID: UUID) async -> Bool {
+        var allSucceeded = true
+        for step in steps {
+            if Task.isCancelled { return false }
+            let success = await runFlowStep(step, in: groupID)
+            allSucceeded = allSucceeded && success
+            if stopFlowOnError && !success { return false }
+        }
+        return allSucceeded
+    }
+
+    private func runFlowStep(_ step: TerminalFlowStep, in groupID: UUID) async -> Bool {
+        await MainActor.run {
+            self.setFlowStepStatus(step.id, in: groupID, status: .running)
+        }
+        switch step.type {
+        case .command:
+            let trimmed = step.command.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.isEmpty {
+                await MainActor.run {
+                    self.setFlowStepStatus(step.id, in: groupID, status: .failed("命令为空"))
+                }
+                return false
+            }
+            await MainActor.run {
+                self.runner.sendRaw(trimmed + "\r")
+                self.setFlowStepStatus(step.id, in: groupID, status: .success)
+            }
+            return true
+
+        case .upload:
+            let trimmed = step.localPath.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else {
+                await MainActor.run {
+                    ToastManager.shared.show(message: "请选择要上传的文件", type: .warning)
+                    self.setFlowStepStatus(step.id, in: groupID, status: .failed("未选择文件"))
+                }
+                return false
+            }
+            guard let sftp = await MainActor.run(resultType: SFTPClient?.self, body: { self.runner.sftp }) else {
+                await MainActor.run {
+                    ToastManager.shared.show(message: "SFTP 未连接", type: .error)
+                    self.setFlowStepStatus(step.id, in: groupID, status: .failed("SFTP 未连接"))
+                }
+                return false
+            }
+            let base = step.remoteDirectory.trimmingCharacters(in: .whitespacesAndNewlines)
+            let resolvedBase: String
+            if !base.isEmpty {
+                resolvedBase = base
+            } else {
+                let runnerPath = await MainActor.run { self.runner.currentPath }
+                resolvedBase = runnerPath.isEmpty ? "/" : runnerPath
+            }
+            let remoteDir = resolvedBase
+            let fileName = URL(fileURLWithPath: trimmed).lastPathComponent
+            let remotePath = remoteDir.hasSuffix("/") ? remoteDir + fileName : remoteDir + "/" + fileName
+            do {
+                try await SFTPService.shared.upload(sftp: sftp, localURL: URL(fileURLWithPath: trimmed), remotePath: remotePath)
+                await MainActor.run {
+                    self.setFlowStepStatus(step.id, in: groupID, status: .success)
+                }
+                return true
+            } catch {
+                await MainActor.run {
+                    ToastManager.shared.show(message: error.localizedDescription, type: .error)
+                    self.setFlowStepStatus(step.id, in: groupID, status: .failed(error.localizedDescription))
+                }
+                return false
+            }
+        }
+    }
+
+    @MainActor
+    private func setFlowStepStatus(_ stepID: UUID, in groupID: UUID, status: FlowStepStatus) {
+        if let groupIndex = flowGroups.firstIndex(where: { $0.id == groupID }),
+           let stepIndex = flowGroups[groupIndex].steps.firstIndex(where: { $0.id == stepID }) {
+            withAnimation {
+                flowGroups[groupIndex].steps[stepIndex].status = status
+                if case .success = status {
+                    flowGroups[groupIndex].steps[stepIndex].isExecuted = true
+                }
+            }
+        }
+    }
+
+    @MainActor
+    private func resetFlowGroupStatus(_ groupID: UUID) {
+        guard let index = flowGroups.firstIndex(where: { $0.id == groupID }) else { return }
+        for i in flowGroups[index].steps.indices {
+            flowGroups[index].steps[i].status = .idle
+            flowGroups[index].steps[i].isExecuted = false
+        }
+    }
+
+    @MainActor
+    private func resetAllFlowStatuses() {
+        for gid in flowGroups.map(\.id) {
+            resetFlowGroupStatus(gid)
+        }
+    }
+
+    @MainActor
+    private func resetFlowStepStatus(_ stepID: UUID, in groupID: UUID) {
+        if let groupIndex = flowGroups.firstIndex(where: { $0.id == groupID }),
+           let stepIndex = flowGroups[groupIndex].steps.firstIndex(where: { $0.id == stepID }) {
+            flowGroups[groupIndex].steps[stepIndex].status = .idle
+            flowGroups[groupIndex].steps[stepIndex].isExecuted = false
+        }
+    }
+
+    @MainActor
+    private func setFlowRunning(_ running: Bool) {
+        withAnimation {
+            isFlowRunning = running
         }
     }
 }
