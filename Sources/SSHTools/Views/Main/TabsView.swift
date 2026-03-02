@@ -122,6 +122,7 @@ struct TabsView: View {
         }
         .onChange(of: tabManager.tabs) { _, _ in
             pruneInvalidPaneTabs()
+            ensureUniqueTabAssignments()
         }
         .onChange(of: panes) { _, newValue in
             layoutStore.save(newValue)
@@ -303,6 +304,7 @@ struct TabsView: View {
         } else {
             panes = updated
         }
+        ensureUniqueTabAssignments()
         normalizeWidths()
     }
     
@@ -318,6 +320,7 @@ struct TabsView: View {
         for pane in panes {
             cacheTabID(pane.tabID, for: pane.id)
         }
+        ensureUniqueTabAssignments()
         normalizeWidths()
     }
     
@@ -361,6 +364,23 @@ struct TabsView: View {
         }
         panes[otherIndex].tabID = replacement
         cacheTabID(replacement, for: panes[otherIndex].id)
+    }
+
+    private func ensureUniqueTabAssignments() {
+        var used = Set<UUID>()
+        var updated = panes
+        for idx in updated.indices {
+            guard let tabID = updated[idx].tabID else { continue }
+            if used.contains(tabID) {
+                let replacement = tabManager.tabs.first(where: { !used.contains($0.id) })?.id
+                updated[idx].tabID = replacement
+                cacheTabID(replacement, for: updated[idx].id)
+                if let replacement { used.insert(replacement) }
+            } else {
+                used.insert(tabID)
+            }
+        }
+        panes = updated
     }
     
     private func beginDragIfNeeded(at index: Int) {

@@ -225,9 +225,28 @@
         terminalEl.addEventListener("focus", () => {
           hardFocus();
         });
-        terminalEl.addEventListener("mousedown", () => {
-          terminalEl.classList.add("allow-select");
+        let dragArmed = false;
+        let dragStarted = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        const dragThreshold = 2;
+
+        terminalEl.addEventListener("mousedown", (event) => {
+          dragArmed = true;
+          dragStarted = false;
+          dragStartX = event.clientX;
+          dragStartY = event.clientY;
           hardFocus();
+        });
+        terminalEl.addEventListener("mousemove", (event) => {
+          if (!dragArmed || dragStarted) return;
+          if ((event.buttons & 1) !== 1) return;
+          const dx = Math.abs(event.clientX - dragStartX);
+          const dy = Math.abs(event.clientY - dragStartY);
+          if (dx >= dragThreshold || dy >= dragThreshold) {
+            dragStarted = true;
+            terminalEl.classList.add("allow-select");
+          }
         });
         terminalEl.addEventListener("click", () => {
           hardFocus();
@@ -239,6 +258,8 @@
           hardFocus();
         });
         window.addEventListener("mouseup", () => {
+          dragArmed = false;
+          dragStarted = false;
           terminalEl.classList.remove("allow-select");
         });
 

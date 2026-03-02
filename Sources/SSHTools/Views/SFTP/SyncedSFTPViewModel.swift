@@ -39,6 +39,7 @@ class SyncedSFTPViewModel: ObservableObject {
     private let refreshRequests = PassthroughSubject<Void, Never>()
     private var lastListedPath: String?
     private var didFallbackToRoot = false
+    private var lastValidPath: String?
     private let persistenceKeyPrefix = "sshtools.sftp.lastPath."
     
     private func normalizedPath(_ input: String) -> String {
@@ -229,6 +230,7 @@ class SyncedSFTPViewModel: ObservableObject {
                     self.didFallbackToRoot = false
                     self.rawFiles = mappedFiles
                     self.lastListedPath = requestedPath
+                    self.lastValidPath = requestedPath
                     self.applyFiltersAndSort()
                     self.isLoading = false
                     self.persistPath()
@@ -246,6 +248,15 @@ class SyncedSFTPViewModel: ObservableObject {
                             return
                         }
                         if status.errorCode == .noSuchFile {
+                            if let fallback = self.lastValidPath, fallback != self.path {
+                                self.path = fallback
+                                self.requestRefresh(immediate: true)
+                                ToastManager.shared.show(
+                                    message: "SFTP path invalid, fallback to \(fallback)",
+                                    type: .warning
+                                )
+                                return
+                            }
                             // Fallback to root once to recover from invalid path
                             if !self.didFallbackToRoot {
                                 self.didFallbackToRoot = true

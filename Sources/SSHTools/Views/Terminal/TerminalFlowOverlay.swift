@@ -110,7 +110,11 @@ struct TerminalFlowOverlay: View {
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 12) {
             headerTitleRow
-            headerActionsRow
+            if isSingleGroupMode {
+                compactActionsRow
+            } else {
+                headerActionsRow
+            }
             searchRow
         }
         .padding(12)
@@ -122,16 +126,18 @@ struct TerminalFlowOverlay: View {
                 .foregroundColor(DesignSystem.Colors.blue)
             Text("Flow")
                 .font(.system(size: 13, weight: .semibold))
-            Text("\(groups.count)")
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(DesignSystem.Colors.textSecondary)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(DesignSystem.Colors.surfaceSecondary)
-                .cornerRadius(10)
+            if !isSingleGroupMode {
+                Text("\(groups.count)")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(DesignSystem.Colors.textSecondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(DesignSystem.Colors.surfaceSecondary)
+                    .cornerRadius(10)
+            }
             Spacer()
 
-            if !groups.isEmpty {
+            if !groups.isEmpty && !isSingleGroupMode {
                 Button("Clear") {
                     withAnimation {
                         groups.removeAll()
@@ -208,6 +214,32 @@ struct TerminalFlowOverlay: View {
         }
     }
 
+    private var compactActionsRow: some View {
+        HStack(spacing: 8) {
+            Toggle(isOn: $stopOnError) {
+                Text("Stop on error")
+                    .font(.system(size: 10, weight: .semibold))
+            }
+            .toggleStyle(.switch)
+            .controlSize(.mini)
+
+            Spacer()
+
+            Button(action: addGroup) {
+                HStack(spacing: 6) {
+                    Image(systemName: "plus")
+                    Text("New Group")
+                }
+                .font(.system(size: 10, weight: .semibold))
+                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
+                .background(DesignSystem.Colors.surfaceSecondary)
+                .cornerRadius(6)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     private var searchRow: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
@@ -271,19 +303,19 @@ struct TerminalFlowOverlay: View {
             groupHeaderRow(group)
 
             if !groupValue.isCollapsed {
-                VStack(spacing: 8) {
+                VStack(spacing: 6) {
                     ForEach(groupValue.steps) { step in
                         stepCard(step, groupID: groupValue.id)
                     }
                 }
             }
         }
-        .padding(8)
-        .background(DesignSystem.Colors.surface)
-        .cornerRadius(10)
+        .padding(isSingleGroupMode ? 6 : 8)
+        .background(isSingleGroupMode ? DesignSystem.Colors.surfaceSecondary.opacity(0.6) : DesignSystem.Colors.surface)
+        .cornerRadius(isSingleGroupMode ? 8 : 10)
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+            RoundedRectangle(cornerRadius: isSingleGroupMode ? 8 : 10)
+                .stroke(Color.primary.opacity(isSingleGroupMode ? 0.04 : 0.06), lineWidth: 1)
         )
         .onDrag {
             NSItemProvider(object: groupValue.id.uuidString as NSString)
@@ -298,7 +330,7 @@ struct TerminalFlowOverlay: View {
         return HStack(spacing: 8) {
             Button(action: { group.isCollapsed.wrappedValue.toggle() }) {
                 Image(systemName: groupValue.isCollapsed ? "chevron.right" : "chevron.down")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 10, weight: .semibold))
                     .foregroundColor(.secondary)
                     .padding(4)
                     .contentShape(Rectangle())
@@ -307,7 +339,7 @@ struct TerminalFlowOverlay: View {
 
             TextField("Group name", text: group.name)
                 .textFieldStyle(.plain)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(DesignSystem.Colors.text)
 
             Text("\(groupValue.steps.count)")
@@ -323,12 +355,14 @@ struct TerminalFlowOverlay: View {
             Button(action: { onExecuteGroup(groupValue) }) {
                 HStack(spacing: 4) {
                     Image(systemName: "play.fill")
-                    Text("Run")
+                    if !isSingleGroupMode {
+                        Text("Run")
+                    }
                 }
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(DesignSystem.Colors.blue)
                 .padding(.vertical, 4)
-                .padding(.horizontal, 8)
+                .padding(.horizontal, isSingleGroupMode ? 6 : 8)
                 .background(DesignSystem.Colors.blue.opacity(0.12))
                 .cornerRadius(6)
                 .contentShape(Rectangle())
@@ -337,22 +371,25 @@ struct TerminalFlowOverlay: View {
 
             Button(action: { addStep(to: groupValue.id) }) {
                 Image(systemName: "plus")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 10, weight: .semibold))
                     .foregroundColor(.secondary)
                     .padding(4)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
 
-            Button(action: { removeGroup(groupValue.id) }) {
-                Image(systemName: "trash")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.secondary)
-                    .padding(4)
-                    .contentShape(Rectangle())
+            if !isSingleGroupMode {
+                Button(action: { removeGroup(groupValue.id) }) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.secondary)
+                        .padding(4)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
+        .padding(.bottom, isSingleGroupMode ? 2 : 0)
     }
 
     private func stepCard(_ step: TerminalFlowStep, groupID: UUID) -> some View {
@@ -366,19 +403,39 @@ struct TerminalFlowOverlay: View {
                 }
                 .pickerStyle(.segmented)
                 .controlSize(.mini)
-                .font(.system(size: 10, weight: .semibold))
-                .frame(width: 100)
+                .font(.system(size: 9, weight: .semibold))
+                .frame(width: 92)
 
                 TextField("Step title", text: stepTitleBinding(stepID: step.id, groupID: groupID))
                     .textFieldStyle(.plain)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(DesignSystem.Colors.text)
 
                 Spacer()
 
+                Button(action: { moveStep(step.id, in: groupID, direction: -1) }) {
+                    Image(systemName: "chevron.up")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.secondary)
+                        .padding(4)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(!canMoveStep(step.id, in: groupID, direction: -1))
+
+                Button(action: { moveStep(step.id, in: groupID, direction: 1) }) {
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.secondary)
+                        .padding(4)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(!canMoveStep(step.id, in: groupID, direction: 1))
+
                 Button(action: { onExecuteStep(step, groupID) }) {
                     Image(systemName: "play.fill")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(DesignSystem.Colors.blue)
                         .padding(4)
                         .background(DesignSystem.Colors.blue.opacity(0.12))
@@ -389,7 +446,7 @@ struct TerminalFlowOverlay: View {
 
                 Button(action: { removeStep(step.id, from: groupID) }) {
                     Image(systemName: "trash")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(.secondary)
                         .padding(4)
                         .contentShape(Rectangle())
@@ -400,16 +457,17 @@ struct TerminalFlowOverlay: View {
             if step.type == .command {
                 TextField("Command", text: stepCommandBinding(stepID: step.id, groupID: groupID))
                     .textFieldStyle(.plain)
-                    .font(.system(size: 11, design: .monospaced))
+                    .font(.system(size: 10, design: .monospaced))
                     .foregroundColor(DesignSystem.Colors.textSecondary)
-                    .padding(6)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 6)
                     .background(DesignSystem.Colors.surfaceSecondary)
                     .cornerRadius(4)
             } else {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 8) {
                         Text(step.localPath.isEmpty ? "No file selected" : step.localPath)
-                            .font(.system(size: 10))
+                            .font(.system(size: 9))
                             .foregroundColor(DesignSystem.Colors.textSecondary)
                             .lineLimit(nil)
                             .fixedSize(horizontal: false, vertical: true)
@@ -419,13 +477,14 @@ struct TerminalFlowOverlay: View {
                             pickLocalFile(for: groupID, stepID: step.id)
                         }
                         .buttonStyle(.plain)
-                        .font(.caption)
+                        .font(.system(size: 9, weight: .medium))
                     }
                     TextField("Remote directory (fallback: current path)", text: stepRemoteDirBinding(stepID: step.id, groupID: groupID))
                         .textFieldStyle(.plain)
-                        .font(.system(size: 10, design: .monospaced))
+                        .font(.system(size: 9, design: .monospaced))
                         .foregroundColor(DesignSystem.Colors.textSecondary)
-                        .padding(6)
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 6)
                         .background(DesignSystem.Colors.surfaceSecondary)
                         .cornerRadius(4)
                 }
@@ -439,9 +498,9 @@ struct TerminalFlowOverlay: View {
                     .truncationMode(.middle)
             }
         }
-        .padding(8)
+        .padding(isSingleGroupMode ? 6 : 8)
         .background(DesignSystem.Colors.surfaceSecondary)
-        .cornerRadius(8)
+        .cornerRadius(isSingleGroupMode ? 6 : 8)
     }
 
     private func addGroup() {
@@ -590,6 +649,30 @@ struct TerminalFlowOverlay: View {
         update(&groups[groupIndex].steps[stepIndex])
     }
 
+    private func stepIndex(stepID: UUID, groupID: UUID) -> Int? {
+        guard let groupIndex = groups.firstIndex(where: { $0.id == groupID }) else { return nil }
+        return groups[groupIndex].steps.firstIndex(where: { $0.id == stepID })
+    }
+
+    private func canMoveStep(_ stepID: UUID, in groupID: UUID, direction: Int) -> Bool {
+        guard let index = stepIndex(stepID: stepID, groupID: groupID),
+              let groupIndex = groups.firstIndex(where: { $0.id == groupID })
+        else { return false }
+        let targetIndex = index + direction
+        return targetIndex >= 0 && targetIndex < groups[groupIndex].steps.count
+    }
+
+    private func moveStep(_ stepID: UUID, in groupID: UUID, direction: Int) {
+        guard let groupIndex = groups.firstIndex(where: { $0.id == groupID }),
+              let index = groups[groupIndex].steps.firstIndex(where: { $0.id == stepID })
+        else { return }
+        let targetIndex = index + direction
+        guard targetIndex >= 0 && targetIndex < groups[groupIndex].steps.count else { return }
+        withAnimation {
+            groups[groupIndex].steps.swapAt(index, targetIndex)
+        }
+    }
+
     private var allCollapsed: Bool {
         !groups.isEmpty && groups.allSatisfy { $0.isCollapsed }
     }
@@ -599,6 +682,10 @@ struct TerminalFlowOverlay: View {
         for index in groups.indices {
             groups[index].isCollapsed = target
         }
+    }
+
+    private var isSingleGroupMode: Bool {
+        groups.count == 1
     }
 
     private var hasSearchResults: Bool {
