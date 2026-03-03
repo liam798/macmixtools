@@ -318,7 +318,7 @@ struct TerminalFlowOverlay: View {
             .onHover { hovering in
                 isHoveringResize = hovering
                 if hovering {
-                    NSCursor.resizeUpLeftDownRight.push()
+                    NSCursor.resizeDiagonal.push()
                 } else {
                     NSCursor.pop()
                 }
