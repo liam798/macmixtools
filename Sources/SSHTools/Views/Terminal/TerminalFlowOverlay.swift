@@ -86,6 +86,9 @@ struct TerminalFlowOverlay: View {
     let onExecuteGroup: (TerminalFlowGroup) -> Void
     let onExecuteAll: () -> Void
     @State private var searchText: String = ""
+    @State private var panelWidth: CGFloat = 520
+    @State private var panelHeight: CGFloat = 520
+    @State private var resizeStart: CGSize? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -101,10 +104,13 @@ struct TerminalFlowOverlay: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
             )
+            .overlay(alignment: .bottomTrailing) {
+                resizeHandle
+            }
 
             bubbleTail
         }
-        .frame(width: 520)
+        .frame(width: panelWidth)
     }
 
     private var headerView: some View {
@@ -280,7 +286,7 @@ struct TerminalFlowOverlay: View {
             }
             .padding(12)
         }
-        .frame(maxHeight: 420)
+        .frame(height: max(240, panelHeight - 110))
         .background(Color.white.opacity(0.95))
     }
 
@@ -295,6 +301,34 @@ struct TerminalFlowOverlay: View {
         }
         .padding(.bottom, -8)
         .zIndex(2)
+    }
+
+    private var resizeHandle: some View {
+        Image(systemName: "arrow.up.left.and.arrow.down.right")
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundColor(.secondary)
+            .padding(6)
+            .background(Color.white.opacity(0.9))
+            .clipShape(Circle())
+            .overlay(Circle().stroke(Color.black.opacity(0.08), lineWidth: 0.5))
+            .padding(8)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 1)
+                    .onChanged { value in
+                        if resizeStart == nil {
+                            resizeStart = CGSize(width: panelWidth, height: panelHeight)
+                        }
+                        let base = resizeStart ?? CGSize(width: panelWidth, height: panelHeight)
+                        let newWidth = max(420, base.width + value.translation.width)
+                        let newHeight = max(320, base.height + value.translation.height)
+                        panelWidth = newWidth
+                        panelHeight = newHeight
+                    }
+                    .onEnded { _ in
+                        resizeStart = nil
+                    }
+            )
     }
 
     private func groupCard(_ group: Binding<TerminalFlowGroup>) -> some View {
