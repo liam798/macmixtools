@@ -231,7 +231,14 @@
         let dragStartY = 0;
         const dragThreshold = 2;
 
+        function clearDragSelect() {
+          dragArmed = false;
+          dragStarted = false;
+          terminalEl.classList.remove("allow-select");
+        }
+
         terminalEl.addEventListener("mousedown", (event) => {
+          if (event.button !== 0) return;
           dragArmed = true;
           dragStarted = false;
           dragStartX = event.clientX;
@@ -257,11 +264,13 @@
         window.addEventListener("focus", () => {
           hardFocus();
         });
-        window.addEventListener("mouseup", () => {
-          dragArmed = false;
-          dragStarted = false;
-          terminalEl.classList.remove("allow-select");
+        window.addEventListener("mouseup", clearDragSelect);
+        window.addEventListener("blur", clearDragSelect);
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) clearDragSelect();
         });
+        terminalEl.addEventListener("mouseleave", clearDragSelect);
+        terminalEl.addEventListener("pointercancel", clearDragSelect);
 
         // Keep input handling on xterm's onData.
 
