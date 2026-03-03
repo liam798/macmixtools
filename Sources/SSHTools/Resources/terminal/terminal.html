@@ -104,6 +104,7 @@
           allowProposedApi: true,
           convertEol: true,
           lineHeight: 1.1,
+          scrollSensitivity: 0.7,
           rendererType: "dom",
           theme: { background: "#000000", foreground: "#ffffff" },
         });
@@ -131,6 +132,10 @@
               return false;
             }
             return true;
+          }
+          if (ev.metaKey && key === "v") {
+            postMessage({ type: "pasteRequest" });
+            return false;
           }
 
           return true;
@@ -259,6 +264,16 @@
           hardFocus();
         });
         terminalEl.addEventListener("keydown", () => {
+          hardFocus();
+        });
+        terminalEl.addEventListener("contextmenu", (event) => {
+          event.preventDefault();
+          const sel = term.getSelection();
+          if (sel && sel.length > 0) {
+            postMessage({ type: "copy", text: sel });
+          } else {
+            postMessage({ type: "pasteRequest" });
+          }
           hardFocus();
         });
         window.addEventListener("focus", () => {
