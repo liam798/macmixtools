@@ -94,17 +94,17 @@ struct TerminalFlowOverlay: View {
                 Divider()
                 groupList
             }
-            .background(DesignSystem.Colors.background)
+            .background(Color.clear)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.2), radius: 15, x: 0, y: 10)
+            .shadow(color: Color.black.opacity(0.12), radius: 20, x: 0, y: 12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.primary.opacity(0.1), lineWidth: 0.5)
+                    .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
             )
 
             bubbleTail
         }
-        .frame(width: 360)
+        .frame(width: 520)
     }
 
     private var headerView: some View {
@@ -280,15 +280,15 @@ struct TerminalFlowOverlay: View {
             }
             .padding(12)
         }
-        .frame(maxHeight: 260)
-        .background(DesignSystem.Colors.background)
+        .frame(maxHeight: 420)
+        .background(Color.clear)
     }
 
     private var bubbleTail: some View {
         HStack {
             Spacer()
             Triangle()
-                .fill(DesignSystem.Colors.surface)
+                .fill(DesignSystem.Colors.surface.opacity(0.2))
                 .frame(width: 14, height: 8)
                 .rotationEffect(.degrees(180))
             Spacer().frame(width: 40)
