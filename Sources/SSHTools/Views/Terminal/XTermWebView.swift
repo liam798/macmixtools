@@ -82,7 +82,9 @@ struct XTermWebView<Runner: TerminalRunner>: NSViewRepresentable {
         }
         session.attach(runner: runner)
         runner.terminalOutput = session
-        session.focus()
+        if nsView.window?.firstResponder === nsView {
+            session.focus()
+        }
     }
 
     static func dismantleNSView(_ nsView: WKWebView, coordinator: ()) {

@@ -244,14 +244,18 @@
 
         terminalEl.addEventListener("mousedown", (event) => {
           if (event.button !== 0) return;
-          dragArmed = true;
+          dragArmed = event.altKey;
           dragStarted = false;
           dragStartX = event.clientX;
           dragStartY = event.clientY;
+          if (!event.altKey) {
+            clearDragSelect();
+          }
           hardFocus();
         });
         terminalEl.addEventListener("mousemove", (event) => {
           if (!dragArmed || dragStarted) return;
+          if (!event.altKey) return;
           if ((event.buttons & 1) !== 1) return;
           const dx = Math.abs(event.clientX - dragStartX);
           const dy = Math.abs(event.clientY - dragStartY);
