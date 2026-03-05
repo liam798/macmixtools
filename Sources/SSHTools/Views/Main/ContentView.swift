@@ -3,59 +3,67 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var store = ConnectionsStore()
     @StateObject private var tabManager = TabManager()
+    private let minSidebarWidth: CGFloat = 180
+    private let maxSidebarWidth: CGFloat = 340
     
     @State private var sidebarSelection: UUID?
     @State private var editingConnectionID: IdentifiableUUID?
     @State private var sidebarWidth: CGFloat = 216
+    @State private var lastSidebarWidth: CGFloat = 216
+    @State private var isSidebarCollapsed = false
     @State private var isDraggingSidebar = false
     @State private var dragStartWidth: CGFloat = 220
     @State private var dragOffset: CGFloat = 0
     
     var body: some View {
-        let minSidebarWidth: CGFloat = 180
-        let maxSidebarWidth: CGFloat = 340
         let splitterWidth: CGFloat = DesignSystem.Layout.sidebarSplitterWidth
 
         ZStack(alignment: .leading) {
             HStack(spacing: 0) {
-                SidebarView(store: store,
-                            tabManager: tabManager,
-                            selection: $sidebarSelection,
-                            editingConnectionID: $editingConnectionID)
-                    .frame(width: sidebarWidth, alignment: .leading)
-                    .background(DesignSystem.Colors.sidebarPanel)
-                    .transaction { $0.animation = nil }
+                if !isSidebarCollapsed {
+                    SidebarView(store: store,
+                                tabManager: tabManager,
+                                selection: $sidebarSelection,
+                                editingConnectionID: $editingConnectionID)
+                        .frame(width: sidebarWidth, alignment: .leading)
+                        .background(DesignSystem.Colors.sidebarPanel)
+                        .transaction { $0.animation = nil }
 
-                VerticalDraggableSplitter(isDragging: $isDraggingSidebar)
-                    .contentShape(Rectangle())
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                if !isDraggingSidebar {
-                                    isDraggingSidebar = true
-                                    dragStartWidth = sidebarWidth
+                    VerticalDraggableSplitter(isDragging: $isDraggingSidebar)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    if !isDraggingSidebar {
+                                        isDraggingSidebar = true
+                                        dragStartWidth = sidebarWidth
+                                    }
+                                    let proposed = value.translation.width
+                                    let clamped = min(max(dragStartWidth + proposed, minSidebarWidth), maxSidebarWidth)
+                                    dragOffset = clamped - dragStartWidth
                                 }
-                                let proposed = value.translation.width
-                                let clamped = min(max(dragStartWidth + proposed, minSidebarWidth), maxSidebarWidth)
-                                dragOffset = clamped - dragStartWidth
-                            }
-                            .onEnded { _ in
-                                isDraggingSidebar = false
-                                let finalWidth = min(max(dragStartWidth + dragOffset, minSidebarWidth), maxSidebarWidth)
-                                withTransaction(Transaction(animation: nil)) {
-                                    sidebarWidth = finalWidth
+                                .onEnded { _ in
+                                    isDraggingSidebar = false
+                                    let finalWidth = min(max(dragStartWidth + dragOffset, minSidebarWidth), maxSidebarWidth)
+                                    withTransaction(Transaction(animation: nil)) {
+                                        sidebarWidth = finalWidth
+                                        lastSidebarWidth = finalWidth
+                                    }
+                                    dragOffset = 0
                                 }
-                                dragOffset = 0
-                            }
-                    )
+                        )
+                }
 
-                TabsView(tabManager: tabManager, connections: $store.connections)
+                TabsView(tabManager: tabManager,
+                         connections: $store.connections,
+                         isSidebarCollapsed: isSidebarCollapsed,
+                         onToggleSidebar: toggleSidebar)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(DesignSystem.Colors.contentPanel)
                     .transaction { $0.animation = nil }
             }
             
-            if isDraggingSidebar {
+            if isDraggingSidebar && !isSidebarCollapsed {
                 Rectangle()
                     .fill(DesignSystem.Colors.blue.opacity(0.6))
                     .frame(width: 2)
@@ -127,6 +135,20 @@ struct ContentView: View {
         if connection.host.isEmpty { return false }
         if (connection.type == .ssh || connection.type == .mysql) && connection.username.isEmpty { return false }
         return true
+    }
+
+    private func toggleSidebar() {
+        withTransaction(Transaction(animation: nil)) {
+            if isSidebarCollapsed {
+                sidebarWidth = min(max(lastSidebarWidth, minSidebarWidth), maxSidebarWidth)
+                isSidebarCollapsed = false
+            } else {
+                lastSidebarWidth = sidebarWidth
+                isDraggingSidebar = false
+                dragOffset = 0
+                isSidebarCollapsed = true
+            }
+        }
     }
 }
 

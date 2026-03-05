@@ -16,6 +16,8 @@ private struct ContentPane: Identifiable, Equatable {
 struct TabsView: View {
     @ObservedObject var tabManager: TabManager
     @Binding var connections: [SSHConnection] // We need write access to update connections from Settings
+    let isSidebarCollapsed: Bool
+    let onToggleSidebar: () -> Void
     
     // Split view state: which tabs are displayed in each pane & their widths (sum to 1)
     @State private var panes: [ContentPane] = []
@@ -29,6 +31,15 @@ struct TabsView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
+                Button(action: onToggleSidebar) {
+                    Image(systemName: isSidebarCollapsed ? "sidebar.right" : "sidebar.left")
+                        .font(.system(size: 12, weight: .semibold))
+                        .frame(width: 20, height: 20)
+                }
+                .buttonStyle(.plain)
+                .help(isSidebarCollapsed ? "展开侧边栏".localized : "收起侧边栏".localized)
+                .padding(.leading, isSidebarCollapsed ? 74 : 10)
+
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 4) {
                         ForEach(tabManager.tabs) { tab in
@@ -41,7 +52,9 @@ struct TabsView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                 }
-                .frame(maxWidth: 720, alignment: .leading)
+                .frame(width: tabStripWidth, alignment: .leading)
+
+                tabAddMenu
 
                 TitlebarBlankArea {
                     handleTitlebarDoubleClick()
@@ -130,6 +143,97 @@ struct TabsView: View {
         .onChange(of: panes) { _, newValue in
             layoutStore.save(newValue)
         }
+    }
+
+    private var tabAddMenu: some View {
+        Menu {
+            Button {
+                tabManager.openTab(content: .home)
+            } label: {
+                Label("Home".localized, systemImage: "house.fill")
+            }
+
+            Button {
+                tabManager.openTab(content: .httpClient)
+            } label: {
+                Label("HTTP Client".localized, systemImage: "network")
+            }
+
+            Button {
+                tabManager.openTab(content: .devToolbox)
+            } label: {
+                Label("Dev Toolbox".localized, systemImage: "wrench.and.screwdriver.fill")
+            }
+
+            if !terminalConnections.isEmpty {
+                Section("SSH / SFTP".localized) {
+                    ForEach(terminalConnections, id: \.id) { connection in
+                        Button {
+                            openConnectionTab(connection)
+                        } label: {
+                            Label(connection.name, systemImage: connection.type == .localTerminal ? "terminal" : "terminal.fill")
+                        }
+                    }
+                }
+            }
+
+            if !redisConnections.isEmpty {
+                Section("Redis".localized) {
+                    ForEach(redisConnections, id: \.id) { connection in
+                        Button {
+                            openConnectionTab(connection)
+                        } label: {
+                            Label(connection.name, systemImage: "cylinder.split.1x2.fill")
+                        }
+                    }
+                }
+            }
+
+            if !databaseConnections.isEmpty {
+                Section("MySQL".localized) {
+                    ForEach(databaseConnections, id: \.id) { connection in
+                        Button {
+                            openConnectionTab(connection)
+                        } label: {
+                            Label(connection.name, systemImage: "server.rack")
+                        }
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "plus")
+                    .font(.system(size: 12, weight: .semibold))
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .semibold))
+            }
+            .foregroundColor(DesignSystem.Colors.textSecondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(DesignSystem.Colors.itemHover)
+            )
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+    }
+
+    private var tabStripWidth: CGFloat {
+        let contentWidth = tabManager.tabs.reduce(CGFloat(0)) { result, tab in
+            result + estimatedTabWidth(for: tab)
+        }
+        let horizontalPadding: CGFloat = 24 // HStack(.padding(.horizontal, 12))
+        return min(max(contentWidth + horizontalPadding, 96), 720)
+    }
+
+    private func estimatedTabWidth(for tab: TabItem) -> CGFloat {
+        let text = tab.content.title as NSString
+        let textWidth = text.size(withAttributes: [.font: NSFont.systemFont(ofSize: 12, weight: .semibold)]).width
+        let iconAndSpacing: CGFloat = 22
+        let closeButton: CGFloat = (tab.content == .home) ? 0 : 16
+        let horizontalPadding: CGFloat = 24 // TabButton .padding(.horizontal, 12)
+        return ceil(textWidth + iconAndSpacing + closeButton + horizontalPadding)
     }
     
     // MARK: - Content Area
@@ -271,6 +375,39 @@ struct TabsView: View {
     private func closeTabAndCleanSplits(_ id: UUID) {
         tabManager.closeTab(id: id)
         pruneInvalidPaneTabs()
+    }
+
+    private var terminalConnections: [SSHConnection] {
+        connections
+            .filter { $0.type == .ssh || $0.type == .localTerminal }
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    private var redisConnections: [SSHConnection] {
+        connections
+            .filter { $0.type == .redis }
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    private var databaseConnections: [SSHConnection] {
+        connections
+            .filter { $0.type == .mysql || $0.type == .clickhouse }
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    private func openConnectionTab(_ connection: SSHConnection) {
+        switch connection.type {
+        case .redis:
+            tabManager.openTab(content: .redis(connection))
+        case .mysql:
+            tabManager.openTab(content: .mysql(connection))
+        case .clickhouse:
+            tabManager.openTab(content: .clickhouse(connection))
+        case .ssh:
+            tabManager.openTab(content: .terminal(connection))
+        case .localTerminal:
+            tabManager.openTab(content: .localTerminal(connection))
+        }
     }
     
     // MARK: - Helpers
