@@ -50,7 +50,7 @@ enum AppConstants {
         /// GitHub raw 内容基础地址
         static let rawContentBase = "https://raw.githubusercontent.com"
         /// 描述文件所在分支
-        static let descriptorBranch = "main"
+        static let descriptorBranch = "master"
         /// 版本描述文件相对路径（位于 default 分支根目录）
         static let descriptorPath = "version-config.json"
         /// 默认本地版本号（当 Info.plist 缺失时使用）
