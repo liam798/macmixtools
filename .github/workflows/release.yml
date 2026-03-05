@@ -12,7 +12,7 @@ jobs:
       contents: write
 
     env:
-      APP_NAME: SSHTools
+      APP_NAME: PrismShell
 
     steps:
       - name: Setup latest stable Xcode

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# SSHTools macOS App Bundle Builder
+# PrismShell macOS App Bundle Builder
 # This script compiles the project and packages it into a .app bundle.
 
 set -e
 
-APP_NAME="SSHTools"
+APP_NAME="PrismShell"
 BUNDLE_ID="com.sshtools.macos"
 BUILD_DIR="build"
 APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
@@ -79,7 +79,7 @@ echo "📝 Generating Info.plist..."
 	    <key>CFBundlePackageType</key>
 	    <string>APPL</string>
 	    <key>CFBundleShortVersionString</key>
-	    <string>1.0.0</string>
+	    <string>1.0.1</string>
 	    <key>LSMinimumSystemVersion</key>
 	    <string>13.0</string>
 	    <key>NSHighResolutionCapable</key>

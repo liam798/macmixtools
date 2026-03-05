@@ -28,7 +28,6 @@ struct TabsView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Tab Bar
             HStack(spacing: 8) {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 4) {
@@ -41,6 +40,11 @@ struct TabsView: View {
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
+                }
+                .frame(maxWidth: 720, alignment: .leading)
+
+                TitlebarBlankArea {
+                    handleTitlebarDoubleClick()
                 }
                 
                 // Split controls
@@ -102,15 +106,14 @@ struct TabsView: View {
                 .padding(.trailing, 12)
             }
             .frame(height: 44)
-            .background(DesignSystem.Colors.background)
+            .background(DesignSystem.Colors.contentPanel)
             .overlay(
                 Rectangle()
                     .frame(height: 1)
-                    .foregroundColor(DesignSystem.Colors.border),
+                    .foregroundColor(DesignSystem.Colors.border.opacity(0.7)),
                 alignment: .bottom
             )
             
-            // Content Area
             contentArea
         }
         .onAppear {
@@ -136,7 +139,7 @@ struct TabsView: View {
             let totalWidth = geo.size.width
             if tabManager.tabs.isEmpty {
                 VStack(spacing: DesignSystem.Spacing.medium) {
-                    Image(systemName: "square.dashed")
+                    Image(systemName: "rectangle.dashed")
                         .font(.system(size: 48))
                         .foregroundColor(DesignSystem.Colors.textSecondary.opacity(0.3))
                     Text("No Open Tabs".localized)
@@ -148,8 +151,10 @@ struct TabsView: View {
                 HStack(spacing: 0) {
                     ForEach(Array(panes.enumerated()), id: \.element.id) { index, pane in
                         VStack(spacing: 0) {
-                            paneHeader(for: pane)
-                            Divider()
+                            if panes.count > 1 {
+                                paneHeader(for: pane)
+                                Divider()
+                            }
                             paneContent(for: pane)
                         }
                         .frame(width: max(pane.width * totalWidth, DesignSystem.Layout.contentPaneMinWidth))
@@ -205,7 +210,7 @@ struct TabsView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(DesignSystem.Colors.surface)
+        .background(DesignSystem.Colors.contentPanel)
     }
     
     @ViewBuilder
@@ -453,6 +458,71 @@ struct TabsView: View {
         panes[index + 1].width = right
         normalizeWidths()
     }
+
+    private func handleTitlebarDoubleClick() {
+        guard let window = NSApp.keyWindow ?? NSApp.mainWindow else { return }
+        let global = UserDefaults.standard.persistentDomain(forName: UserDefaults.globalDomain)
+        if let miniaturize = global?["AppleMiniaturizeOnDoubleClick"] as? Bool, miniaturize {
+            window.miniaturize(nil)
+            return
+        }
+        if let action = global?["AppleActionOnDoubleClick"] as? String {
+            let normalized = action.lowercased()
+            if normalized.contains("minimize") {
+                window.miniaturize(nil)
+                return
+            }
+            if normalized.contains("maximize") || normalized.contains("zoom") {
+                // Use native zoom API to fill available screen area instead of entering macOS full-screen space.
+                window.performZoom(nil)
+                return
+            }
+        }
+        window.performZoom(nil)
+    }
+}
+
+private struct TitlebarBlankArea: View {
+    let onDoubleClick: () -> Void
+
+    var body: some View {
+        Color.clear
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay(
+                TitlebarInteractionView(onDoubleClick: onDoubleClick)
+            )
+    }
+}
+
+private struct TitlebarInteractionView: NSViewRepresentable {
+    let onDoubleClick: () -> Void
+
+    func makeNSView(context: Context) -> NSView {
+        let view = TitlebarInteractionNSView()
+        view.onDoubleClick = onDoubleClick
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        guard let view = nsView as? TitlebarInteractionNSView else { return }
+        view.onDoubleClick = onDoubleClick
+    }
+}
+
+private final class TitlebarInteractionNSView: NSView {
+    var onDoubleClick: (() -> Void)?
+
+    override var mouseDownCanMoveWindow: Bool { true }
+
+    override func hitTest(_ point: NSPoint) -> NSView? { self }
+
+    override func mouseDown(with event: NSEvent) {
+        if event.clickCount == 2 {
+            onDoubleClick?()
+            return
+        }
+        window?.performDrag(with: event)
+    }
 }
 
 private struct SplitDragHandle: View {
@@ -466,20 +536,20 @@ private struct SplitDragHandle: View {
     var body: some View {
         ZStack {
             Rectangle()
-                .fill(DesignSystem.Colors.border)
-                .frame(width: 2)
+                .fill(DesignSystem.Colors.border.opacity(0.8))
+                .frame(width: 1)
                 .frame(maxHeight: .infinity)
             
             if isActive {
                 Rectangle()
                     .fill(DesignSystem.Colors.blue)
-                    .frame(width: 3)
+                    .frame(width: 2)
                     .frame(maxHeight: .infinity)
                     .offset(x: dragOffset)
             } else {
                 RoundedRectangle(cornerRadius: 1)
                     .fill(DesignSystem.Colors.textSecondary.opacity(0.25))
-                    .frame(width: 3, height: 36)
+                    .frame(width: 2, height: 36)
             }
             
             Color.clear
@@ -532,7 +602,7 @@ struct TabButton: View {
                         .font(.system(size: 8, weight: .bold))
                         .foregroundColor(DesignSystem.Colors.textSecondary)
                         .padding(4)
-                        .background(isHovering ? Color.white.opacity(0.1) : Color.clear)
+                        .background(isHovering ? DesignSystem.Colors.itemHover : Color.clear)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -543,7 +613,7 @@ struct TabButton: View {
         .frame(height: 28)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isSelected ? DesignSystem.Colors.surface : (isHovering ? Color.white.opacity(0.05) : Color.clear))
+                .fill(isSelected ? DesignSystem.Colors.itemSelected : (isHovering ? DesignSystem.Colors.itemHover : Color.clear))
         )
         .onTapGesture { onSelect() }
         .onHover { isHovering = $0 }

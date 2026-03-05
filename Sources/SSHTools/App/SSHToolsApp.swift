@@ -44,11 +44,22 @@ struct SSHToolsApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .background(
+                    WindowConfigurator { window in
+                        window.toolbar = nil
+                        window.titleVisibility = .hidden
+                        window.titlebarAppearsTransparent = true
+                        window.styleMask.insert(.fullSizeContentView)
+                        window.isMovableByWindowBackground = true
+                    }
+                )
+                .ignoresSafeArea(.container, edges: .top)
                 .preferredColorScheme(settings.userTheme.colorScheme)
                 .task {
                     await UpdateChecker.shared.checkForUpdates()
                 }
         }
+        .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1200, height: 800)
     }
 }

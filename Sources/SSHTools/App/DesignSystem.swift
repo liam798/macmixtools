@@ -1,8 +1,15 @@
 import SwiftUI
+import AppKit
 
 struct DesignSystem {
     // MARK: - Colors
     struct Colors {
+        private static func adaptive(_ light: NSColor, _ dark: NSColor) -> Color {
+            Color(nsColor: NSColor(name: nil) { appearance in
+                appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? dark : light
+            })
+        }
+
         static let primary = Color("AccentColor")
         static let secondary = Color.secondary
         
@@ -18,6 +25,13 @@ struct DesignSystem {
         static let background = Color(nsColor: .controlBackgroundColor)
         static let surface = Color(nsColor: .unemphasizedSelectedContentBackgroundColor).opacity(0.1)
         static let surfaceSecondary = Color(nsColor: .separatorColor).opacity(0.1)
+
+        // App shell palette (for left-right structure)
+        static let shellCanvas = adaptive(NSColor(red: 0.95, green: 0.96, blue: 0.98, alpha: 1), NSColor(red: 0.12, green: 0.13, blue: 0.15, alpha: 1))
+        static let sidebarPanel = adaptive(NSColor(red: 0.93, green: 0.94, blue: 0.96, alpha: 1), NSColor(red: 0.16, green: 0.17, blue: 0.20, alpha: 1))
+        static let contentPanel = adaptive(NSColor(red: 0.97, green: 0.97, blue: 0.98, alpha: 1), NSColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1))
+        static let itemSelected = adaptive(NSColor(red: 0.86, green: 0.89, blue: 0.95, alpha: 1), NSColor(red: 0.24, green: 0.29, blue: 0.39, alpha: 1))
+        static let itemHover = adaptive(NSColor(red: 0.89, green: 0.91, blue: 0.94, alpha: 1), NSColor(red: 0.22, green: 0.24, blue: 0.30, alpha: 1))
         
         static let border = Color(nsColor: .separatorColor)
         static let text = Color(nsColor: .labelColor)

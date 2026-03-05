@@ -13,31 +13,26 @@ struct SidebarView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // App Header & Global Actions
-            VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "terminal.fill")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(DesignSystem.Colors.blue)
-                        Text("SSHTools")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                    }
-                    Spacer()
-                    
-                    // Add Connection
-                    SidebarAddMenu(store: store, onAdd: addConnection)
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 16)
-                .padding(.bottom, 16)
+            HStack(spacing: 10) {
+                Image(systemName: "terminal")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(DesignSystem.Colors.textSecondary)
+                    .frame(width: 24, height: 24)
+                    .background(DesignSystem.Colors.itemHover)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                Text("PrismShell")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(DesignSystem.Colors.text)
+                Spacer()
+                SidebarAddMenu(store: store, onAdd: addConnection)
             }
-            .background(DesignSystem.Colors.sidebarBackground)
-            
-            // Search Area
+            .padding(.horizontal, 12)
+            .padding(.top, 40)
+            .padding(.bottom, 12)
+
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(DesignSystem.Colors.textSecondary)
                     .font(.system(size: 12))
                 
                 TextField("Search...".localized, text: $searchText)
@@ -45,7 +40,7 @@ struct SidebarView: View {
                     .font(.system(size: 13))
             }
             .padding(8)
-            .background(Color.primary.opacity(0.05))
+            .background(DesignSystem.Colors.contentPanel)
             .cornerRadius(8)
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
@@ -67,7 +62,8 @@ struct SidebarView: View {
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
             
-            Divider().background(DesignSystem.Colors.border)
+            Divider()
+                .background(DesignSystem.Colors.border.opacity(0.7))
             
             // Sidebar List
             ScrollView {
@@ -160,7 +156,7 @@ struct SidebarView: View {
                 .padding(.vertical, 8)
             }
         }
-        .background(DesignSystem.Colors.sidebarBackground)
+        .background(DesignSystem.Colors.sidebarPanel)
     }
     
     private var recentConnections: [SSHConnection] {
@@ -191,8 +187,8 @@ struct SidebarView: View {
     private func sidebarSection<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.secondary)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(DesignSystem.Colors.textSecondary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 4)
             
@@ -276,7 +272,7 @@ struct SidebarActionButton: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 6)
-            .background(color.opacity(0.1))
+            .background(DesignSystem.Colors.contentPanel)
             .foregroundColor(color)
             .cornerRadius(6)
         }
@@ -302,7 +298,7 @@ private struct SidebarToolRow: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
-        .background(isSelected ? Color.blue.opacity(0.15) : Color.clear)
+        .background(isSelected ? DesignSystem.Colors.itemSelected : Color.clear)
         .cornerRadius(8)
         .contentShape(Rectangle())
     }
@@ -345,7 +341,7 @@ private struct ConnectionItemRow: View {
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 12)
-        .background(isSelected ? Color.blue.opacity(0.15) : Color.clear)
+        .background(isSelected ? DesignSystem.Colors.itemSelected : Color.clear)
         .cornerRadius(8)
         .contentShape(Rectangle())
         .onTapGesture { onSelect() }
@@ -398,7 +394,7 @@ private struct SidebarAddMenu: View {
         } label: {
             Image(systemName: "plus.circle.fill")
                 .font(.system(size: 16))
-                .foregroundColor(DesignSystem.Colors.blue)
+                .foregroundColor(DesignSystem.Colors.textSecondary)
         }
         .buttonStyle(.plain)
     }

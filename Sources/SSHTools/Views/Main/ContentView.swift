@@ -6,54 +6,53 @@ struct ContentView: View {
     
     @State private var sidebarSelection: UUID?
     @State private var editingConnectionID: IdentifiableUUID?
-    @State private var sidebarWidth: CGFloat = 220
+    @State private var sidebarWidth: CGFloat = 216
     @State private var isDraggingSidebar = false
     @State private var dragStartWidth: CGFloat = 220
     @State private var dragOffset: CGFloat = 0
     
     var body: some View {
-        let minSidebarWidth: CGFloat = 150
-        let maxSidebarWidth: CGFloat = 500
+        let minSidebarWidth: CGFloat = 180
+        let maxSidebarWidth: CGFloat = 340
         let splitterWidth: CGFloat = DesignSystem.Layout.sidebarSplitterWidth
 
         ZStack(alignment: .leading) {
             HStack(spacing: 0) {
-            // 1. Sidebar (Solid background, zero margin)
-            SidebarView(store: store, 
-                        tabManager: tabManager, 
-                        selection: $sidebarSelection, 
-                        editingConnectionID: $editingConnectionID)
-                .frame(width: sidebarWidth, alignment: .leading)
-                .transaction { $0.animation = nil }
-            
-            // 2. Draggable Divider
-            VerticalDraggableSplitter(isDragging: $isDraggingSidebar)
-                .contentShape(Rectangle())
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { value in
-                            if !isDraggingSidebar {
-                                isDraggingSidebar = true
-                                dragStartWidth = sidebarWidth
+                SidebarView(store: store,
+                            tabManager: tabManager,
+                            selection: $sidebarSelection,
+                            editingConnectionID: $editingConnectionID)
+                    .frame(width: sidebarWidth, alignment: .leading)
+                    .background(DesignSystem.Colors.sidebarPanel)
+                    .transaction { $0.animation = nil }
+
+                VerticalDraggableSplitter(isDragging: $isDraggingSidebar)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { value in
+                                if !isDraggingSidebar {
+                                    isDraggingSidebar = true
+                                    dragStartWidth = sidebarWidth
+                                }
+                                let proposed = value.translation.width
+                                let clamped = min(max(dragStartWidth + proposed, minSidebarWidth), maxSidebarWidth)
+                                dragOffset = clamped - dragStartWidth
                             }
-                            let proposed = value.translation.width
-                            let clamped = min(max(dragStartWidth + proposed, minSidebarWidth), maxSidebarWidth)
-                            dragOffset = clamped - dragStartWidth
-                        }
-                        .onEnded { _ in
-                            isDraggingSidebar = false
-                            let finalWidth = min(max(dragStartWidth + dragOffset, minSidebarWidth), maxSidebarWidth)
-                            withTransaction(Transaction(animation: nil)) {
-                                sidebarWidth = finalWidth
+                            .onEnded { _ in
+                                isDraggingSidebar = false
+                                let finalWidth = min(max(dragStartWidth + dragOffset, minSidebarWidth), maxSidebarWidth)
+                                withTransaction(Transaction(animation: nil)) {
+                                    sidebarWidth = finalWidth
+                                }
+                                dragOffset = 0
                             }
-                            dragOffset = 0
-                        }
-                )
-            
-            // 3. Detail Area
-            TabsView(tabManager: tabManager, connections: $store.connections)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .transaction { $0.animation = nil }
+                    )
+
+                TabsView(tabManager: tabManager, connections: $store.connections)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(DesignSystem.Colors.contentPanel)
+                    .transaction { $0.animation = nil }
             }
             
             if isDraggingSidebar {
@@ -64,7 +63,7 @@ struct ContentView: View {
                     .allowsHitTesting(false)
             }
         }
-        .background(DesignSystem.Colors.background)
+        .background(DesignSystem.Colors.shellCanvas)
         .onChange(of: sidebarSelection) { oldValue, newValue in
             handleSelectionChange(newValue)
         }
