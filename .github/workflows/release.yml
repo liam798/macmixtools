@@ -28,7 +28,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.ref }}
           fetch-depth: 1
+          fetch-tags: false
+          submodules: false
+          lfs: false
 
       - name: Resolve tag
         id: version
