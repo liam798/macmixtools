@@ -54,7 +54,7 @@ enum AppConstants {
         /// 版本描述文件相对路径（位于 default 分支根目录）
         static let descriptorPath = "version-config.json"
         /// 默认本地版本号（当 Info.plist 缺失时使用）
-        static let fallbackVersion = "1.0.1"
+        static let fallbackVersion = "1.0.0"
         /// 自动检查的最小间隔（秒），设为 0 表示每次冷启动都检查
         static let minimumCheckInterval: TimeInterval = 0
     }

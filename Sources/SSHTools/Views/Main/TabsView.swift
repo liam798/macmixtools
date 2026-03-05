@@ -18,6 +18,7 @@ struct TabsView: View {
     @Binding var connections: [SSHConnection] // We need write access to update connections from Settings
     let isSidebarCollapsed: Bool
     let onToggleSidebar: () -> Void
+    @ObservedObject private var updateChecker = UpdateChecker.shared
     
     // Split view state: which tabs are displayed in each pane & their widths (sum to 1)
     @State private var panes: [ContentPane] = []
@@ -59,6 +60,8 @@ struct TabsView: View {
                 TitlebarBlankArea {
                     handleTitlebarDoubleClick()
                 }
+
+                updateNoticeView
                 
                 // Split controls
                 HStack(spacing: 6) {
@@ -217,6 +220,43 @@ struct TabsView: View {
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
+    }
+
+    @ViewBuilder
+    private var updateNoticeView: some View {
+        if updateChecker.isInstallingUpdate, let update = updateChecker.availableUpdate {
+            HStack(spacing: 6) {
+                ProgressView()
+                    .controlSize(.small)
+                Text("正在更新 v\(update.version)")
+                    .font(.system(size: 11, weight: .semibold))
+            }
+            .foregroundColor(DesignSystem.Colors.orange)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(DesignSystem.Colors.itemHover)
+            )
+            .fixedSize()
+        } else if let update = updateChecker.availableUpdate {
+            Button {
+                updateChecker.presentUpdateAlert()
+            } label: {
+                Text("发现新版本: v\(update.version)")
+                    .font(.system(size: 11, weight: .semibold))
+                    .lineLimit(1)
+                    .foregroundColor(DesignSystem.Colors.orange)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(DesignSystem.Colors.itemHover)
+                    )
+            }
+            .buttonStyle(.plain)
+            .fixedSize()
+        }
     }
 
     private var tabStripWidth: CGFloat {
