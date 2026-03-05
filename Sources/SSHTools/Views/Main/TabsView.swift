@@ -780,6 +780,7 @@ struct TabButton: View {
             }
         }
         .padding(.horizontal, 6)
+        .frame(minWidth: 100)
         .frame(height: 28)
         .background(
             RoundedRectangle(cornerRadius: 6)
