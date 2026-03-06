@@ -10,11 +10,14 @@ struct SystemMonitorView: View {
                     .font(.caption.bold())
                 Spacer()
                 Button(action: { service.stopMonitoring() }) {
-                    Image(systemName: "xmark")
-                        .font(.caption2)
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16))
                         .foregroundColor(.secondary)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .frame(width: 36, height: 36)
+                .contentShape(Rectangle())
             }
             .padding(.bottom, 2)
             
@@ -92,6 +95,7 @@ struct SystemMonitorView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                .allowsHitTesting(false)
         )
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
     }
