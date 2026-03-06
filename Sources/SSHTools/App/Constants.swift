@@ -44,7 +44,7 @@ enum AppConstants {
     /// 更新相关
     enum Update {
         /// GitHub 仓库标识（owner/repo）
-        static let repository = "liam798/PrismShell"
+        static let repository = "0224leijianqiang/macmixtools"
         /// GitHub Releases API 基础地址
         static let releasesAPIBase = "https://api.github.com/repos"
         /// GitHub raw 内容基础地址
