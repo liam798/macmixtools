@@ -62,7 +62,9 @@ class SystemMonitorService: ObservableObject {
     func stopMonitoring() {
         timer?.invalidate()
         timer = nil
-        isVisible = false
+        DispatchQueue.main.async { [weak self] in
+            self?.isVisible = false
+        }
     }
     
     func toggle() {
