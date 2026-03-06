@@ -220,7 +220,7 @@ struct TerminalView: View {
                         }
                     }
                     .zIndex(5)
-                    
+
                     // AI 面板弹出
                     if viewModel.showAIHelper {
                         VStack {
@@ -244,28 +244,6 @@ struct TerminalView: View {
                         .zIndex(20)
                     }
 
-                    if viewModel.showFlowPanel {
-                        VStack {
-                            Spacer()
-                            HStack {
-                                Spacer()
-                                TerminalFlowOverlay(
-                                    isPresented: $viewModel.showFlowPanel,
-                                    groups: $viewModel.flowGroups,
-                                    stopOnError: $viewModel.stopFlowOnError,
-                                    onExecuteStep: viewModel.executeFlowStep,
-                                    onExecuteGroup: viewModel.executeFlowGroup,
-                                    onExecuteAll: viewModel.executeAllFlowGroups
-                                )
-                                .padding(.trailing, 20)
-                                .padding(.bottom, 60)
-                                .allowsHitTesting(true)
-                            }
-                        }
-                        .allowsHitTesting(true)
-                        .zIndex(20)
-                    }
-                    
                     // 连接状态横幅
                     if viewModel.runner.isConnecting || viewModel.showSuccessBanner {
                         HStack {
@@ -278,6 +256,8 @@ struct TerminalView: View {
                         .zIndex(30)
                     }
                 }
+                .frame(height: terminalHeight)
+                .clipped()
                 
                 // 2. 分割线
                 DraggableSplitter(
@@ -321,6 +301,21 @@ struct TerminalView: View {
         }
         .onAppear { viewModel.connect() }
         .background(DesignSystem.Colors.background)
+        .overlay(alignment: .bottomTrailing) {
+            if viewModel.showFlowPanel {
+                TerminalFlowOverlay(
+                    isPresented: $viewModel.showFlowPanel,
+                    groups: $viewModel.flowGroups,
+                    stopOnError: $viewModel.stopFlowOnError,
+                    onExecuteStep: viewModel.executeFlowStep,
+                    onExecuteGroup: viewModel.executeFlowGroup,
+                    onExecuteAll: viewModel.executeAllFlowGroups
+                )
+                .padding(.trailing, 20)
+                .padding(.bottom, 16)
+                .zIndex(100)
+            }
+        }
     }
     
     @ViewBuilder

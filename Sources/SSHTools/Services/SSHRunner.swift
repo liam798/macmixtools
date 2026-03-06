@@ -405,6 +405,10 @@ class SSHRunner: ObservableObject, Cleanable {
                 }
                 continue
             }
+            if ch == "\u{15}" || ch == "\u{03}" { // Ctrl-U / Ctrl-C clear the current edit buffer
+                inputLineBuffer = ""
+                continue
+            }
             if ch == "\t" {
                 inputHadTab = true
                 continue

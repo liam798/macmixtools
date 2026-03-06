@@ -1,0 +1,36 @@
+	<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+	<plist version="1.0">
+	<dict>
+	    <key>CFBundleExecutable</key>
+	    <string>SSHTools</string>
+	    <key>CFBundleIconFile</key>
+	    <string>AppIcon</string>
+	    <key>CFBundleIdentifier</key>
+	    <string>com.sshtools.macos</string>
+	    <key>CFBundleName</key>
+	    <string>SSHTools</string>
+	    <key>CFBundlePackageType</key>
+	    <string>APPL</string>
+	    <key>CFBundleShortVersionString</key>
+	    <string>1.0.0</string>
+	    <key>LSMinimumSystemVersion</key>
+	    <string>13.0</string>
+	    <key>NSHighResolutionCapable</key>
+	    <true/>
+	    <key>NSAppTransportSecurity</key>
+	    <dict>
+	        <!-- ClickHouse uses HTTP (8123) by default; allow it. -->
+	        <key>NSAllowsArbitraryLoads</key>
+	        <true/>
+	    </dict>
+	</dict>
+	</plist>
+	EOF
+
+# 6. Codesign (Ad-hoc signing)
+echo "🔐 Codesigning..."
+codesign --force --deep --sign - "build/SSHTools.app"
+
+echo "✅ Success! Application bundle created at: build/SSHTools.app"
+echo "📂 You can now move it to your Applications folder or run it directly."

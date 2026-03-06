@@ -14,6 +14,7 @@ final class TerminalWebViewSession: NSObject, WKScriptMessageHandler, WKNavigati
     private var outputLineBuffer = ""
     private var outputLogBytes: Int = 0
     private let outputLogLimit: Int = 1024 * 64 // 64 KB per session to avoid log spam
+    private var commandHistoryCache: [String] = []
     private let markerStart = "__SSHTOOLS_PWD__"
     private let markerEnd = "__END__"
 
@@ -93,6 +94,7 @@ final class TerminalWebViewSession: NSObject, WKScriptMessageHandler, WKNavigati
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         isLoaded = true
         flushIfReady()
+        syncCommandHistoryToWeb()
         webView.evaluateJavaScript("window.sshToolsFocus && window.sshToolsFocus()", completionHandler: nil)
         if pendingFocus {
             pendingFocus = false
@@ -158,6 +160,20 @@ final class TerminalWebViewSession: NSObject, WKScriptMessageHandler, WKNavigati
             if let data = text.data(using: .utf8) {
                 runner?.send(data: data)
             }
+
+        case "applySuggestion":
+            guard let command = dict["command"] as? String else { return }
+            let trimmed = command.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return }
+            if let clearData = "\u{15}".data(using: .utf8) {
+                runner?.send(data: clearData)
+            }
+            if let cmdData = trimmed.data(using: .utf8) {
+                runner?.send(data: cmdData)
+            }
+
+        case "requestCommandHistory":
+            syncCommandHistoryToWeb()
 
         case "cwd":
             guard let raw = dict["data"] as? String else { return }
@@ -293,6 +309,10 @@ final class TerminalWebViewSession: NSObject, WKScriptMessageHandler, WKNavigati
                     break
                 }
                 let cleaned = sanitizeOutputLine(trimmed)
+                if let command = extractCommandFromPromptLine(cleaned) {
+                    CommandSnippetStore.shared.recordCommand(command, connectionID: runner?.connectionID)
+                    syncCommandHistoryToWeb()
+                }
                 if cleaned.contains(" cd ") || cleaned.hasSuffix(" cd") || cleaned.hasSuffix(" cd/") || cleaned.contains(" cd\t") {
                     maybeHandleCd(from: cleaned)
                 }
@@ -329,7 +349,6 @@ final class TerminalWebViewSession: NSObject, WKScriptMessageHandler, WKNavigati
         if let sshRunner = runner as? SSHRunner, sshRunner.shouldSkipOutputCd(cmdString) {
             return
         }
-
         let resolved = resolvePath(pathPart, current: runner?.currentPath ?? "/")
         Logger.log("SFTP: parsed cd raw=\"\(rawArg)\" path=\"\(pathPart)\" resolved=\"\(resolved)\"", level: .info)
         DispatchQueue.main.async { [weak runner] in
@@ -404,6 +423,34 @@ final class TerminalWebViewSession: NSObject, WKScriptMessageHandler, WKNavigati
             out.append(ch)
         }
         return out
+    }
+
+    /// Extract command text from a prompt line like `[root@host dir]# ls -la`.
+    private func extractCommandFromPromptLine(_ line: String) -> String? {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        let promptDelims: [Character] = ["#", "$", "%", ">", "▶"]
+        for delim in promptDelims {
+            if let idx = trimmed.lastIndex(of: delim),
+               trimmed.index(after: idx) < trimmed.endIndex {
+                let tail = trimmed[trimmed.index(after: idx)...].trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !tail.isEmpty else { return nil }
+                return tail
+            }
+        }
+        return nil
+    }
+
+    private func syncCommandHistoryToWeb() {
+        guard isLoaded else { return }
+        let history = CommandSnippetStore.shared.allCommands(connectionID: runner?.connectionID, limit: 80)
+        guard history != commandHistoryCache else { return }
+        commandHistoryCache = history
+        guard let data = try? JSONSerialization.data(withJSONObject: history, options: []),
+              let json = String(data: data, encoding: .utf8)
+        else { return }
+        webView.evaluateJavaScript("window.sshToolsSetCommandHistory && window.sshToolsSetCommandHistory(\(json));", completionHandler: nil)
     }
 
 }

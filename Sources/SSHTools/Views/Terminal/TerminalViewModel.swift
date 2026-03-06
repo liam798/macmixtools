@@ -76,6 +76,7 @@ class TerminalViewModel: ObservableObject {
                 self?.saveFlowSteps()
             }
             .store(in: &cancellables)
+
     }
     
     deinit {

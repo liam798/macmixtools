@@ -89,6 +89,7 @@ struct TerminalFlowOverlay: View {
     @State private var panelWidth: CGFloat = 520
     @State private var panelHeight: CGFloat = 520
     @State private var resizeStart: CGSize? = nil
+    @State private var resizePreview: CGSize? = nil
     @State private var isHoveringResize: Bool = false
 
     var body: some View {
@@ -105,8 +106,19 @@ struct TerminalFlowOverlay: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
             )
-            .overlay(alignment: .topLeading) {
+            .overlay(alignment: .topTrailing) {
                 resizeHandle
+            }
+            .overlay(alignment: .topTrailing) {
+                if let preview = resizePreview {
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            DesignSystem.Colors.blue.opacity(0.9),
+                            style: StrokeStyle(lineWidth: 1, dash: [6, 4])
+                        )
+                        .frame(width: preview.width, height: preview.height)
+                        .allowsHitTesting(false)
+                }
             }
 
             bubbleTail
@@ -327,11 +339,15 @@ struct TerminalFlowOverlay: View {
                         let base = resizeStart ?? CGSize(width: panelWidth, height: panelHeight)
                         let newWidth = max(420, base.width - value.translation.width)
                         let newHeight = max(320, base.height - value.translation.height)
-                        panelWidth = newWidth
-                        panelHeight = newHeight
+                        resizePreview = CGSize(width: newWidth, height: newHeight)
                     }
                     .onEnded { _ in
+                        if let preview = resizePreview {
+                            panelWidth = preview.width
+                            panelHeight = preview.height
+                        }
                         resizeStart = nil
+                        resizePreview = nil
                     }
             )
     }

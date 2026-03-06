@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <link rel="stylesheet" href="xterm.css" />
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        background: #000;
+        overflow: hidden;
+      }
+      #terminal {
+        width: 100%;
+        height: 100%;
+        user-select: none;
+        position: relative;
+      }
+      #fallback {
+        position: absolute;
+        inset: 0;
+        padding: 12px;
+        color: #9ef;
+        font-family: ui-monospace, Menlo, Monaco, monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+      .xterm .xterm-viewport {
+        overflow-y: auto;
+      }
+      #terminal.allow-select,
+      #terminal.allow-select * {
+        user-select: text;
+      }
+      #cmd-suggest {
+        position: absolute;
+        display: none;
+        min-width: 220px;
+        max-width: min(560px, calc(100% - 12px));
+        max-height: 190px;
+        overflow-y: auto;
+        z-index: 999;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        background: rgba(15, 15, 15, 0.96);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+        font-family: Menlo, Monaco, SFMono-Regular, ui-monospace, monospace;
+        font-size: 12px;
+      }
+      #cmd-suggest .item {
+        padding: 6px 9px;
+        color: #e9f0ff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: default;
+      }
+      #cmd-suggest .item.active {
+        background: rgba(62, 122, 255, 0.28);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="terminal"></div>
+    <div id="cmd-suggest"></div>
+    <div id="fallback"></div>
+
+    <script src="xterm.js"></script>
+    <script src="xterm-addon-fit.js"></script>
+    <script>
+      (function () {
+        const encoder = new TextEncoder();
+        const fallbackEl = document.getElementById("fallback");
+        const suggestEl = document.getElementById("cmd-suggest");
+        let commandHistory = [];
+        let visibleSuggestions = [];
+        let selectedSuggestionIndex = 0;
+        let currentInputBuffer = "";
+
+        function bytesToBase64(bytes) {
+          let binary = "";
+          for (let i = 0; i < bytes.length; i++) {
+            binary += String.fromCharCode(bytes[i]);
+          }
+          return btoa(binary);
+        }
+
+        function base64ToBytes(b64) {
+          const binary = atob(b64);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          return bytes;
+        }
+
+        function postMessage(payload) {
+          try {
+            window.webkit.messageHandlers.sshTerm.postMessage(payload);
+          } catch (_) {}
+        }
+
+        window.onerror = function (message, source, lineno, colno, error) {
+          const text =
+            String(message) +
+            "\n" +
+            String(source || "") +
+            ":" +
+            String(lineno || 0) +
+            ":" +
+            String(colno || 0) +
+            (error && error.stack ? "\n" + String(error.stack) : "");
+          if (fallbackEl) fallbackEl.textContent = text;
+          postMessage({ type: "jsError", message: text });
+          return false;
+        };
+
+        if (!window.Terminal) {
+          const msg = "xterm.js failed to load (window.Terminal is missing).";
+          if (fallbackEl) fallbackEl.textContent = msg;
+          postMessage({ type: "jsError", message: msg });
+          return;
+        }
+
+        const term = new Terminal({
+          cursorBlink: true,
+          scrollback: 5000,
+          fontFamily:
+            "Menlo, Monaco, SFMono-Regular, ui-monospace, monospace",
+          fontSize: 13,
+          allowProposedApi: true,
+          convertEol: true,
+          lineHeight: 1.1,
+          scrollSensitivity: 0.7,
+          rendererType: "dom",
+          theme: { background: "#000000", foreground: "#ffffff" },
+        });
+
+        const fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+
+        if (term.unicode && term.unicode.versions && term.unicode.versions.length) {
+          const latestUnicode = term.unicode.versions[term.unicode.versions.length - 1];
+          try {
+            if (term.unicode.activeVersion !== latestUnicode) {
+              term.unicode.activeVersion = latestUnicode;
+            }
+          } catch (_) {}
+        }
+
+        term.attachCustomKeyEventHandler((ev) => {
+          if (ev.type !== "keydown") return true;
+
+          const key = (ev.key || "").toLowerCase();
+          if (suggestEl && suggestEl.style.display !== "none") {
+            if (key === "arrowdown") {
+              ev.preventDefault();
+              selectedSuggestionIndex = Math.min(
+                selectedSuggestionIndex + 1,
+                Math.max(0, visibleSuggestions.length - 1)
+              );
+              renderSuggestions();
+              return false;
+            }
+            if (key === "arrowup") {
+              ev.preventDefault();
+              selectedSuggestionIndex = Math.max(0, selectedSuggestionIndex - 1);
+              renderSuggestions();
+              return false;
+            }
+            if (key === "enter") {
+              ev.preventDefault();
+              applySelectedSuggestion();
+              return false;
+            }
+            if (key === "escape") {
+              hideSuggestions();
+              return false;
+            }
+          }
+          if (ev.metaKey && key === "c") {
+            const sel = term.getSelection();
+            if (sel && sel.length > 0) {
+              postMessage({ type: "copy", text: sel });
+              return false;
+            }
+            return true;
+          }
+          if (ev.metaKey && key === "v") {
+            return true;
+          }
+
+          return true;
+        });
+
+        term.onData((data) => {
+          const bytes = encoder.encode(data);
+          postMessage({ type: "input", b64: bytesToBase64(bytes) });
+          updateInputBuffer(data);
+          refreshSuggestions();
+        });
+
+        term.onResize((size) => {
+          postMessage({ type: "resize", cols: size.cols, rows: size.rows });
+          try {
+            term.refresh(0, Math.max(0, size.rows - 1));
+          } catch (_) {}
+        });
+
+        if (term.parser && typeof term.parser.registerOscHandler === "function") {
+          term.parser.registerOscHandler(7, (data) => {
+            postMessage({ type: "cwd", data: String(data || "") });
+            return true;
+          });
+        }
+
+        const writeQueue = [];
+        let writeInProgress = false;
+
+        function processWriteQueue() {
+          if (writeInProgress) return;
+          if (writeQueue.length === 0) return;
+
+          const items = writeQueue.splice(0, writeQueue.length);
+          let total = 0;
+          for (let i = 0; i < items.length; i++) {
+            try {
+              total += atob(items[i]).length;
+            } catch (_) {}
+          }
+          if (total <= 0) return;
+
+          const merged = new Uint8Array(total);
+          let offset = 0;
+          for (let i = 0; i < items.length; i++) {
+            try {
+              const bytes = base64ToBytes(items[i]);
+              merged.set(bytes, offset);
+              offset += bytes.length;
+            } catch (_) {}
+          }
+
+          writeInProgress = true;
+          try {
+            term.write(merged, () => {
+              writeInProgress = false;
+              processWriteQueue();
+            });
+          } catch (_) {
+            writeInProgress = false;
+            processWriteQueue();
+          }
+        }
+
+        window.sshToolsWriteBatchBase64 = function (items) {
+          if (!Array.isArray(items) || items.length === 0) return;
+          for (let i = 0; i < items.length; i++) {
+            if (typeof items[i] === "string") {
+              writeQueue.push(items[i]);
+            }
+          }
+          processWriteQueue();
+        };
+
+        window.sshToolsWriteBase64 = function (b64) {
+          window.sshToolsWriteBatchBase64([b64]);
+        };
+
+        window.sshToolsSetCommandHistory = function (items) {
+          if (!Array.isArray(items)) return;
+          commandHistory = items.filter((x) => typeof x === "string" && x.length > 0);
+          refreshSuggestions();
+        };
+
+        function hardFocus() {
+          try { term.focus(); } catch (_) {}
+          try {
+            const ta = terminalEl.querySelector("textarea");
+            if (ta) ta.focus();
+          } catch (_) {}
+        }
+
+        window.sshToolsFocus = function () {
+          hardFocus();
+          try { term.scrollToBottom(); } catch (_) {}
+        };
+
+        const terminalEl = document.getElementById("terminal");
+        terminalEl.tabIndex = 0;
+        terminalEl.addEventListener("focus", () => {
+          hardFocus();
+        });
+        let dragArmed = false;
+        let dragStarted = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        const dragThreshold = 2;
+
+        function clearDragSelect() {
+          dragArmed = false;
+          dragStarted = false;
+          terminalEl.classList.remove("allow-select");
+        }
+
+        terminalEl.addEventListener("mousedown", (event) => {
+          if (event.button !== 0) return;
+          dragArmed = event.altKey;
+          dragStarted = false;
+          dragStartX = event.clientX;
+          dragStartY = event.clientY;
+          if (!event.altKey) {
+            clearDragSelect();
+          }
+          hardFocus();
+        });
+        terminalEl.addEventListener("mousemove", (event) => {
+          if (!dragArmed || dragStarted) return;
+          if (!event.altKey) return;
+          if ((event.buttons & 1) !== 1) return;
+          const dx = Math.abs(event.clientX - dragStartX);
+          const dy = Math.abs(event.clientY - dragStartY);
+          if (dx >= dragThreshold || dy >= dragThreshold) {
+            dragStarted = true;
+            terminalEl.classList.add("allow-select");
+          }
+        });
+        terminalEl.addEventListener("click", () => {
+          hardFocus();
+        });
+        terminalEl.addEventListener("keydown", () => {
+          hardFocus();
+        });
+        terminalEl.addEventListener("contextmenu", (event) => {
+          event.preventDefault();
+          const sel = term.getSelection();
+          if (sel && sel.length > 0) {
+            postMessage({ type: "copy", text: sel });
+          } else {
+            postMessage({ type: "pasteRequest" });
+          }
+          hardFocus();
+        });
+        window.addEventListener("focus", () => {
+          hardFocus();
+        });
+        window.addEventListener("mouseup", clearDragSelect);
+        window.addEventListener("blur", clearDragSelect);
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) clearDragSelect();
+        });
+        terminalEl.addEventListener("mouseleave", clearDragSelect);
+        terminalEl.addEventListener("pointercancel", clearDragSelect);
+        window.addEventListener("resize", () => {
+          if (suggestEl && suggestEl.style.display !== "none") {
+            positionSuggestions();
+          }
+        });
+
+        // Keep input handling on xterm's onData.
+
+        term.open(terminalEl);
+        postMessage({ type: "requestCommandHistory" });
+        if (fallbackEl) fallbackEl.remove();
+
+        const ro = new ResizeObserver(() => {
+          fitAddon.fit();
+        });
+        ro.observe(terminalEl);
+
+        requestAnimationFrame(() => {
+          fitAddon.fit();
+          try {
+            const dims = term._core && term._core._renderService && term._core._renderService.dimensions;
+            if (dims && dims.css && dims.css.cell && dims.css.cell.height) {
+              term.element.style.lineHeight = `${dims.css.cell.height}px`;
+            }
+          } catch (_) {}
+          term.focus();
+          postMessage({ type: "ready" });
+        });
+
+        function updateInputBuffer(data) {
+          for (let i = 0; i < data.length; i++) {
+            const ch = data[i];
+            if (ch === "\r" || ch === "\n") {
+              currentInputBuffer = "";
+              continue;
+            }
+            if (ch === "\u007f" || ch === "\u0008") {
+              if (currentInputBuffer.length > 0) {
+                currentInputBuffer = currentInputBuffer.slice(0, -1);
+              }
+              continue;
+            }
+            if (ch === "\u0015" || ch === "\u0003") {
+              currentInputBuffer = "";
+              continue;
+            }
+            const code = ch.charCodeAt(0);
+            if (code < 32 || code === 127) {
+              continue;
+            }
+            currentInputBuffer += ch;
+          }
+          if (currentInputBuffer.length > 220) {
+            currentInputBuffer = currentInputBuffer.slice(-220);
+          }
+        }
+
+        function refreshSuggestions() {
+          const query = String(currentInputBuffer || "").trim();
+          if (!query || !Array.isArray(commandHistory) || commandHistory.length === 0) {
+            hideSuggestions();
+            return;
+          }
+          const lower = query.toLowerCase();
+          const results = [];
+          for (let i = 0; i < commandHistory.length; i++) {
+            const cmd = commandHistory[i];
+            if (cmd.toLowerCase().startsWith(lower)) {
+              results.push(cmd);
+              if (results.length >= 7) break;
+            }
+          }
+          if (results.length === 0) {
+            hideSuggestions();
+            return;
+          }
+          visibleSuggestions = results;
+          selectedSuggestionIndex = Math.min(
+            selectedSuggestionIndex,
+            Math.max(0, visibleSuggestions.length - 1)
+          );
+          renderSuggestions();
+          positionSuggestions();
+        }
+
+        function renderSuggestions() {
+          if (!suggestEl) return;
+          if (!visibleSuggestions.length) {
+            hideSuggestions();
+            return;
+          }
+          suggestEl.innerHTML = "";
+          for (let i = 0; i < visibleSuggestions.length; i++) {
+            const item = document.createElement("div");
+            item.className = "item" + (i === selectedSuggestionIndex ? " active" : "");
+            item.textContent = visibleSuggestions[i];
+            item.addEventListener("mouseenter", () => {
+              selectedSuggestionIndex = i;
+              renderSuggestions();
+            });
+            item.addEventListener("mousedown", (e) => {
+              e.preventDefault();
+              selectedSuggestionIndex = i;
+              applySelectedSuggestion();
+            });
+            suggestEl.appendChild(item);
+          }
+          suggestEl.style.display = "block";
+          const active = suggestEl.querySelector(".item.active");
+          if (active && active.scrollIntoView) {
+            active.scrollIntoView({ block: "nearest" });
+          }
+        }
+
+        function positionSuggestions() {
+          if (!suggestEl || suggestEl.style.display === "none") return;
+          let left = 8;
+          let top = 8;
+          try {
+            const dims =
+              term &&
+              term._core &&
+              term._core._renderService &&
+              term._core._renderService.dimensions;
+            const css = dims && dims.css ? dims.css : null;
+            const cell = css && css.cell ? css.cell : null;
+            const cursorX = term && term.buffer && term.buffer.active ? term.buffer.active.cursorX : 0;
+            const cursorY = term && term.buffer && term.buffer.active ? term.buffer.active.cursorY : 0;
+            const cellW = (cell && cell.width) || 8;
+            const cellH = (cell && cell.height) || 18;
+            left = Math.round(cursorX * cellW + 6);
+            top = Math.round((cursorY + 1) * cellH + 6);
+          } catch (_) {}
+
+          const maxLeft = Math.max(0, terminalEl.clientWidth - suggestEl.offsetWidth - 6);
+          left = Math.max(4, Math.min(left, maxLeft));
+
+          const belowBottom = top + suggestEl.offsetHeight + 6 > terminalEl.clientHeight;
+          if (belowBottom) {
+            top = Math.max(4, top - suggestEl.offsetHeight - 24);
+          }
+          suggestEl.style.left = `${left}px`;
+          suggestEl.style.top = `${top}px`;
+        }
+
+        function hideSuggestions() {
+          visibleSuggestions = [];
+          selectedSuggestionIndex = 0;
+          if (suggestEl) {
+            suggestEl.style.display = "none";
+            suggestEl.innerHTML = "";
+          }
+        }
+
+        function applySelectedSuggestion() {
+          if (!visibleSuggestions.length) return;
+          const cmd = visibleSuggestions[Math.max(0, selectedSuggestionIndex)] || "";
+          if (!cmd) return;
+          postMessage({ type: "applySuggestion", command: cmd });
+          currentInputBuffer = cmd;
+          hideSuggestions();
+          hardFocus();
+        }
+      })();
+    </script>
+  </body>
+</html>

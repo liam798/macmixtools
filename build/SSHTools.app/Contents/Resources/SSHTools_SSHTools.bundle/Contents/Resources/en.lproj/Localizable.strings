@@ -1,0 +1,129 @@
+/* Sidebar & Common */
+"Servers" = "Servers";
+"Add" = "Add";
+"Export Config" = "Export Config";
+"Import Config" = "Import Config";
+"SSH Terminal" = "SSH Terminal";
+"Local Terminal" = "Local Terminal";
+"Redis" = "Redis";
+"Configure" = "Configure";
+"Open SFTP" = "Open SFTP";
+"Open in New Tab" = "Open in New Tab";
+"Close" = "Close";
+"Connect" = "Connect";
+"Delete" = "Delete";
+"Cancel" = "Cancel";
+"Save" = "Save";
+"Config Exported" = "Config Exported";
+"Config Imported" = "Config Imported";
+"Error" = "Error";
+
+/* Home */
+"Welcome Home" = "Welcome Home";
+"Manage your connections and tasks" = "Manage your connections and tasks";
+"Todo List" = "Todo List";
+"Add a new task..." = "Add a new task...";
+"No tasks yet. Enjoy your day!" = "No tasks yet. Enjoy your day!";
+"Todo Reminder" = "Todo Reminder";
+"Home" = "Home";
+
+/* Settings Sheet */
+"Configuration" = "Configuration";
+"General" = "General";
+"Name" = "Name";
+"Host" = "Host";
+"Port" = "Port";
+"Username" = "Username";
+"Authentication" = "Authentication";
+"Use Private Key" = "Use Private Key";
+"Key Path" = "Key Path";
+"Browse" = "Browse";
+"Password (Optional)" = "Password (Optional)";
+"Redis Settings" = "Redis Settings";
+"Database Index" = "Database Index";
+
+/* Terminal / Tabs */
+"Settings" = "Settings";
+"No Open Tabs" = "No Open Tabs";
+"Split View" = "Split View";
+"Close Split" = "Close Split";
+"Reset Layout" = "Reset Layout";
+"Nudge Split Left" = "Nudge Split Left";
+"Nudge Split Right" = "Nudge Split Right";
+"Connected" = "Connected";
+"Disconnected" = "Disconnected";
+"Connecting to" = "Connecting to";
+"Waiting for shell path..." = "Waiting for shell path...";
+"Not Connected" = "Not Connected";
+
+/* SFTP */
+"Path" = "Path";
+"Upload File" = "Upload File";
+"Download" = "Download";
+"items" = "items";
+
+/* Redis View */
+"Keys" = "Keys";
+"Type" = "Type";
+"Value" = "Value";
+"TTL" = "TTL";
+"Refresh" = "Refresh";
+"Search keys..." = "Search keys...";
+"Load More" = "Load More";
+"Select a key to view details" = "Select a key to view details";
+"Update Value" = "Update Value";
+"Delete Key" = "Delete Key";
+
+/* MySQL */
+"MySQL Database" = "MySQL Database";
+"ClickHouse Database" = "ClickHouse Database";
+"Database" = "Database";
+"Databases" = "Databases";
+"Tables" = "Tables";
+"Rows" = "Rows";
+"Structure" = "Structure";
+"Data" = "Data";
+"Execute" = "Execute";
+"Query" = "Query";
+"Result" = "Result";
+"No tables found" = "No tables found";
+"Select a table" = "Select a table";
+"Pagination" = "Pagination";
+"Previous" = "Previous";
+"Next" = "Next";
+"Page" = "Page";
+"MySQL Settings" = "MySQL Settings";
+"ClickHouse Settings" = "ClickHouse Settings";
+"ClickHouse Dashboard" = "ClickHouse Dashboard";
+
+/* HTTP Client */
+"Tools" = "Tools";
+"HTTP Client" = "HTTP Client";
+"Saved Uploads" = "Saved Uploads";
+"No saved tasks" = "No saved tasks";
+"Add Upload Task" = "Add Upload Task";
+"Local File" = "Local File";
+"Choose File" = "Choose File";
+"Remote Directory" = "Remote Directory";
+"SFTP not connected" = "SFTP not connected";
+"Local file not found" = "Local file not found";
+"Remote directory is empty" = "Remote directory is empty";
+"Upload" = "Upload";
+"Note" = "Note";
+"Method" = "Method";
+"URL" = "URL";
+"Send" = "Send";
+"Headers" = "Headers";
+"Body" = "Body";
+"Response" = "Response";
+"Status" = "Status";
+"Time" = "Time";
+"Size" = "Size";
+"Preview" = "Preview";
+"No response yet" = "No response yet";
+"Add Header" = "Add Header";
+"Key" = "Key";
+"Enter URL" = "Enter URL";
+
+/* Settings */
+"Use Local Proxy" = "Use Local Proxy";

@@ -20,6 +20,7 @@
         width: 100%;
         height: 100%;
         user-select: none;
+        position: relative;
       }
       #fallback {
         position: absolute;
@@ -37,10 +38,37 @@
       #terminal.allow-select * {
         user-select: text;
       }
+      #cmd-suggest {
+        position: absolute;
+        display: none;
+        min-width: 220px;
+        max-width: min(560px, calc(100% - 12px));
+        max-height: 190px;
+        overflow-y: auto;
+        z-index: 999;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        background: rgba(15, 15, 15, 0.96);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+        font-family: Menlo, Monaco, SFMono-Regular, ui-monospace, monospace;
+        font-size: 12px;
+      }
+      #cmd-suggest .item {
+        padding: 6px 9px;
+        color: #e9f0ff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: default;
+      }
+      #cmd-suggest .item.active {
+        background: rgba(62, 122, 255, 0.28);
+      }
     </style>
   </head>
   <body>
     <div id="terminal"></div>
+    <div id="cmd-suggest"></div>
     <div id="fallback"></div>
 
     <script src="xterm.js"></script>
@@ -49,6 +77,11 @@
       (function () {
         const encoder = new TextEncoder();
         const fallbackEl = document.getElementById("fallback");
+        const suggestEl = document.getElementById("cmd-suggest");
+        let commandHistory = [];
+        let visibleSuggestions = [];
+        let selectedSuggestionIndex = 0;
+        let currentInputBuffer = "";
 
         function bytesToBase64(bytes) {
           let binary = "";
@@ -125,6 +158,32 @@
           if (ev.type !== "keydown") return true;
 
           const key = (ev.key || "").toLowerCase();
+          if (suggestEl && suggestEl.style.display !== "none") {
+            if (key === "arrowdown") {
+              ev.preventDefault();
+              selectedSuggestionIndex = Math.min(
+                selectedSuggestionIndex + 1,
+                Math.max(0, visibleSuggestions.length - 1)
+              );
+              renderSuggestions();
+              return false;
+            }
+            if (key === "arrowup") {
+              ev.preventDefault();
+              selectedSuggestionIndex = Math.max(0, selectedSuggestionIndex - 1);
+              renderSuggestions();
+              return false;
+            }
+            if (key === "enter") {
+              ev.preventDefault();
+              applySelectedSuggestion();
+              return false;
+            }
+            if (key === "escape") {
+              hideSuggestions();
+              return false;
+            }
+          }
           if (ev.metaKey && key === "c") {
             const sel = term.getSelection();
             if (sel && sel.length > 0) {
@@ -134,8 +193,7 @@
             return true;
           }
           if (ev.metaKey && key === "v") {
-            postMessage({ type: "pasteRequest" });
-            return false;
+            return true;
           }
 
           return true;
@@ -144,6 +202,8 @@
         term.onData((data) => {
           const bytes = encoder.encode(data);
           postMessage({ type: "input", b64: bytesToBase64(bytes) });
+          updateInputBuffer(data);
+          refreshSuggestions();
         });
 
         term.onResize((size) => {
@@ -210,6 +270,12 @@
 
         window.sshToolsWriteBase64 = function (b64) {
           window.sshToolsWriteBatchBase64([b64]);
+        };
+
+        window.sshToolsSetCommandHistory = function (items) {
+          if (!Array.isArray(items)) return;
+          commandHistory = items.filter((x) => typeof x === "string" && x.length > 0);
+          refreshSuggestions();
         };
 
         function hardFocus() {
@@ -290,10 +356,16 @@
         });
         terminalEl.addEventListener("mouseleave", clearDragSelect);
         terminalEl.addEventListener("pointercancel", clearDragSelect);
+        window.addEventListener("resize", () => {
+          if (suggestEl && suggestEl.style.display !== "none") {
+            positionSuggestions();
+          }
+        });
 
         // Keep input handling on xterm's onData.
 
         term.open(terminalEl);
+        postMessage({ type: "requestCommandHistory" });
         if (fallbackEl) fallbackEl.remove();
 
         const ro = new ResizeObserver(() => {
@@ -312,6 +384,141 @@
           term.focus();
           postMessage({ type: "ready" });
         });
+
+        function updateInputBuffer(data) {
+          for (let i = 0; i < data.length; i++) {
+            const ch = data[i];
+            if (ch === "\r" || ch === "\n") {
+              currentInputBuffer = "";
+              continue;
+            }
+            if (ch === "\u007f" || ch === "\u0008") {
+              if (currentInputBuffer.length > 0) {
+                currentInputBuffer = currentInputBuffer.slice(0, -1);
+              }
+              continue;
+            }
+            if (ch === "\u0015" || ch === "\u0003") {
+              currentInputBuffer = "";
+              continue;
+            }
+            const code = ch.charCodeAt(0);
+            if (code < 32 || code === 127) {
+              continue;
+            }
+            currentInputBuffer += ch;
+          }
+          if (currentInputBuffer.length > 220) {
+            currentInputBuffer = currentInputBuffer.slice(-220);
+          }
+        }
+
+        function refreshSuggestions() {
+          const query = String(currentInputBuffer || "").trim();
+          if (!query || !Array.isArray(commandHistory) || commandHistory.length === 0) {
+            hideSuggestions();
+            return;
+          }
+          const lower = query.toLowerCase();
+          const results = [];
+          for (let i = 0; i < commandHistory.length; i++) {
+            const cmd = commandHistory[i];
+            if (cmd.toLowerCase().startsWith(lower)) {
+              results.push(cmd);
+              if (results.length >= 7) break;
+            }
+          }
+          if (results.length === 0) {
+            hideSuggestions();
+            return;
+          }
+          visibleSuggestions = results;
+          selectedSuggestionIndex = Math.min(
+            selectedSuggestionIndex,
+            Math.max(0, visibleSuggestions.length - 1)
+          );
+          renderSuggestions();
+          positionSuggestions();
+        }
+
+        function renderSuggestions() {
+          if (!suggestEl) return;
+          if (!visibleSuggestions.length) {
+            hideSuggestions();
+            return;
+          }
+          suggestEl.innerHTML = "";
+          for (let i = 0; i < visibleSuggestions.length; i++) {
+            const item = document.createElement("div");
+            item.className = "item" + (i === selectedSuggestionIndex ? " active" : "");
+            item.textContent = visibleSuggestions[i];
+            item.addEventListener("mouseenter", () => {
+              selectedSuggestionIndex = i;
+              renderSuggestions();
+            });
+            item.addEventListener("mousedown", (e) => {
+              e.preventDefault();
+              selectedSuggestionIndex = i;
+              applySelectedSuggestion();
+            });
+            suggestEl.appendChild(item);
+          }
+          suggestEl.style.display = "block";
+          const active = suggestEl.querySelector(".item.active");
+          if (active && active.scrollIntoView) {
+            active.scrollIntoView({ block: "nearest" });
+          }
+        }
+
+        function positionSuggestions() {
+          if (!suggestEl || suggestEl.style.display === "none") return;
+          let left = 8;
+          let top = 8;
+          try {
+            const dims =
+              term &&
+              term._core &&
+              term._core._renderService &&
+              term._core._renderService.dimensions;
+            const css = dims && dims.css ? dims.css : null;
+            const cell = css && css.cell ? css.cell : null;
+            const cursorX = term && term.buffer && term.buffer.active ? term.buffer.active.cursorX : 0;
+            const cursorY = term && term.buffer && term.buffer.active ? term.buffer.active.cursorY : 0;
+            const cellW = (cell && cell.width) || 8;
+            const cellH = (cell && cell.height) || 18;
+            left = Math.round(cursorX * cellW + 6);
+            top = Math.round((cursorY + 1) * cellH + 6);
+          } catch (_) {}
+
+          const maxLeft = Math.max(0, terminalEl.clientWidth - suggestEl.offsetWidth - 6);
+          left = Math.max(4, Math.min(left, maxLeft));
+
+          const belowBottom = top + suggestEl.offsetHeight + 6 > terminalEl.clientHeight;
+          if (belowBottom) {
+            top = Math.max(4, top - suggestEl.offsetHeight - 24);
+          }
+          suggestEl.style.left = `${left}px`;
+          suggestEl.style.top = `${top}px`;
+        }
+
+        function hideSuggestions() {
+          visibleSuggestions = [];
+          selectedSuggestionIndex = 0;
+          if (suggestEl) {
+            suggestEl.style.display = "none";
+            suggestEl.innerHTML = "";
+          }
+        }
+
+        function applySelectedSuggestion() {
+          if (!visibleSuggestions.length) return;
+          const cmd = visibleSuggestions[Math.max(0, selectedSuggestionIndex)] || "";
+          if (!cmd) return;
+          postMessage({ type: "applySuggestion", command: cmd });
+          currentInputBuffer = cmd;
+          hideSuggestions();
+          hardFocus();
+        }
       })();
     </script>
   </body>
