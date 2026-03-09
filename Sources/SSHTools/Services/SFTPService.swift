@@ -350,6 +350,22 @@ class SFTPService {
             throw error
         }
     }
+
+    func uploadItem(sftp: SFTPClient, localURL: URL, remotePath: String) async throws {
+        let startedAccessing = localURL.startAccessingSecurityScopedResource()
+        defer {
+            if startedAccessing {
+                localURL.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        let values = try localURL.resourceValues(forKeys: [.isDirectoryKey])
+        if values.isDirectory == true {
+            try await uploadDirectory(sftp: sftp, localDirectoryURL: localURL, remoteDirectoryPath: remotePath)
+        } else {
+            try await upload(sftp: sftp, localURL: localURL, remotePath: remotePath)
+        }
+    }
     
     func rename(sftp: SFTPClient, oldPath: String, newPath: String) async throws {
         try await sftp.rename(at: oldPath, to: newPath)
@@ -379,5 +395,89 @@ class SFTPService {
             }
         }
         return s
+    }
+
+    private func uploadDirectory(
+        sftp: SFTPClient,
+        localDirectoryURL: URL,
+        remoteDirectoryPath: String
+    ) async throws {
+        try await ensureRemoteDirectoryExists(sftp: sftp, at: remoteDirectoryPath)
+
+        let keys: [URLResourceKey] = [.isDirectoryKey, .isRegularFileKey]
+        guard let enumerator = FileManager.default.enumerator(
+            at: localDirectoryURL,
+            includingPropertiesForKeys: keys,
+            options: [],
+            errorHandler: { url, error in
+                Logger.log("SFTP: skip local item \(url.path) - \(error.localizedDescription)", level: .warning)
+                return true
+            }
+        ) else {
+            throw NSError(
+                domain: "SFTPService",
+                code: 4,
+                userInfo: [NSLocalizedDescriptionKey: "Unable to enumerate directory \(localDirectoryURL.path)"]
+            )
+        }
+
+        let items = enumerator.compactMap { $0 as? URL }
+        for itemURL in items {
+            let relativePath = itemURL.path.replacingOccurrences(of: localDirectoryURL.path + "/", with: "")
+            let remoteItemPath = joinRemotePath(remoteDirectoryPath, relativePath)
+            let itemValues = try itemURL.resourceValues(forKeys: Set(keys))
+
+            if itemValues.isDirectory == true {
+                try await ensureRemoteDirectoryExists(sftp: sftp, at: remoteItemPath)
+                continue
+            }
+
+            if itemValues.isRegularFile == true {
+                try await upload(sftp: sftp, localURL: itemURL, remotePath: remoteItemPath)
+            }
+        }
+    }
+
+    private func ensureRemoteDirectoryExists(sftp: SFTPClient, at path: String) async throws {
+        let normalized = normalizeRemotePath(path)
+        guard normalized != "/" else { return }
+
+        var current = ""
+        for part in normalized.split(separator: "/", omittingEmptySubsequences: true) {
+            current += "/" + part
+            do {
+                try await sftp.createDirectory(atPath: current)
+            } catch let status as SFTPMessage.Status {
+                if status.errorCode == .failure || status.errorCode == .noSuchFile || status.errorCode == .permissionDenied {
+                    do {
+                        let attrs = try await sftp.getAttributes(at: current)
+                        let isDirectory = (attrs.permissions ?? 0) & 0x4000 != 0
+                        if isDirectory {
+                            continue
+                        }
+                    } catch {
+                        throw status
+                    }
+                }
+                throw status
+            }
+        }
+    }
+
+    private func joinRemotePath(_ base: String, _ relative: String) -> String {
+        let cleanBase = base.hasSuffix("/") ? String(base.dropLast()) : base
+        let cleanRelative = relative.hasPrefix("/") ? String(relative.dropFirst()) : relative
+        if cleanBase.isEmpty || cleanBase == "/" {
+            return "/" + cleanRelative
+        }
+        return cleanBase + "/" + cleanRelative
+    }
+
+    private func normalizeRemotePath(_ path: String) -> String {
+        let trimmed = path.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "/" }
+        if trimmed == "/" { return "/" }
+        let noTrailingSlash = trimmed.hasSuffix("/") ? String(trimmed.dropLast()) : trimmed
+        return noTrailingSlash.hasPrefix("/") ? noTrailingSlash : "/" + noTrailingSlash
     }
 }

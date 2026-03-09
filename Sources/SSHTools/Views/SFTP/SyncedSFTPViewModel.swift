@@ -398,7 +398,7 @@ class SyncedSFTPViewModel: ObservableObject {
         Task { [weak self] in
             guard let self = self else { return }
             do {
-                try await SFTPService.shared.upload(sftp: sftp, localURL: localURL, remotePath: remotePath)
+                try await SFTPService.shared.uploadItem(sftp: sftp, localURL: localURL, remotePath: remotePath)
                 await MainActor.run { self.refresh() }
             } catch {
                 Logger.log("Upload failed: \(error.localizedDescription)", level: .error)
